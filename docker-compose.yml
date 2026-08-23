@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=production_jwt_secret_society_tracker_2026
+      - DATABASE_URL=sqlite:///./complaint.db
+      - FRONTEND_URL=http://localhost:5173
+      - DEFAULT_OVERDUE_DAYS=7
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_data:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  backend_uploads:
+  backend_data:

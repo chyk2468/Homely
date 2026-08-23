@@ -1,0 +1,1295 @@
+Yes. For a scratch → production Kubernetes journey, I would treat it like learning an actual infrastructure stack, not just a list of kubectl commands.
+
+Given that you already work with Docker, WSL, FastAPI, AI agents, RAG, Ollama and local services, your eventual goal should be:
+
+Take an AI application on your laptop → containerize it → deploy it to Kubernetes → expose it securely → scale it → monitor it → troubleshoot it → deploy it to a cloud production cluster.
+
+Kubernetes Deep-Dive Roadmap
+LEVEL 0
+Computer & Linux fundamentals
+        ↓
+LEVEL 1
+Networking fundamentals
+        ↓
+LEVEL 2
+Docker & Containers
+        ↓
+LEVEL 3
+Kubernetes fundamentals
+        ↓
+LEVEL 4
+Kubernetes architecture
+        ↓
+LEVEL 5
+Workloads
+        ↓
+LEVEL 6
+Networking
+        ↓
+LEVEL 7
+Storage
+        ↓
+LEVEL 8
+Configuration & Secrets
+        ↓
+LEVEL 9
+Security
+        ↓
+LEVEL 10
+Scheduling & Resources
+        ↓
+LEVEL 11
+Scaling & High Availability
+        ↓
+LEVEL 12
+Observability
+        ↓
+LEVEL 13
+Helm & Packaging
+        ↓
+LEVEL 14
+CI/CD & GitOps
+        ↓
+LEVEL 15
+Cloud Kubernetes
+        ↓
+LEVEL 16
+Production Engineering
+        ↓
+LEVEL 17
+Advanced / AI workloads
+LEVEL 0 — Prerequisites
+
+Before Kubernetes, understand what Kubernetes is actually controlling.
+
+0.1 Linux
+
+Learn:
+
+pwd
+ls
+cd
+cp
+mv
+rm
+mkdir
+cat
+less
+grep
+find
+chmod
+chown
+ps
+top
+kill
+curl
+wget
+ssh
+systemctl
+journalctl
+df
+du
+free
+ip
+ss
+tar
+
+Understand:
+
+Process
+PID
+Environment variable
+File permissions
+Users/groups
+Signals
+Services
+Logs
+Filesystem
+Sockets
+Ports
+
+You should understand what happens when:
+
+python app.py
+
+runs.
+
+LEVEL 1 — Networking
+
+Kubernetes is heavily about networking.
+
+You need to understand:
+
+IP addresses
+127.0.0.1
+192.168.x.x
+10.x.x.x
+172.16.x.x
+Ports
+HTTP   → 80
+HTTPS  → 443
+SSH    → 22
+FastAPI → 8000
+PostgreSQL → 5432
+TCP vs UDP
+
+Understand:
+
+Client
+ ↓
+IP
+ ↓
+Port
+ ↓
+Process
+DNS
+
+Understand:
+
+google.com
+     ↓
+DNS
+     ↓
+IP address
+HTTP
+
+Understand:
+
+GET
+POST
+PUT
+PATCH
+DELETE
+Reverse proxy
+
+Understand:
+
+Internet
+   ↓
+Nginx
+   ↓
+FastAPI
+
+This knowledge becomes extremely important when you reach:
+
+Service
+Ingress
+Ingress Controller
+CoreDNS
+NetworkPolicy
+LoadBalancer
+LEVEL 2 — Docker
+
+Before Kubernetes, become comfortable with Docker.
+
+Understand the difference between:
+
+Image
+Container
+Volume
+Network
+Registry
+
+Learn:
+
+docker build
+docker run
+docker ps
+docker stop
+docker rm
+docker images
+docker pull
+docker push
+docker exec
+docker logs
+docker inspect
+
+Then Dockerfile:
+
+FROM python:3.12-slim
+
+
+WORKDIR /app
+
+
+COPY requirements.txt .
+
+
+RUN pip install -r requirements.txt
+
+
+COPY . .
+
+
+CMD ["python", "app.py"]
+
+Understand exactly:
+
+Dockerfile
+   ↓
+docker build
+   ↓
+Image
+   ↓
+docker run
+   ↓
+Container
+
+Then learn Docker Compose.
+
+For example:
+
+Frontend
+   ↓
+Backend
+   ↓
+PostgreSQL
+   ↓
+Redis
+
+This is the perfect bridge to Kubernetes.
+
+LEVEL 3 — What Kubernetes Actually Is
+
+Now start Kubernetes.
+
+Understand the problem first.
+
+Without Kubernetes:
+
+Server 1
+ ├── API
+ ├── DB
+ └── Worker
+
+What happens when API crashes?
+
+What happens when traffic becomes 10×?
+
+What happens when server dies?
+
+What happens when you need 20 servers?
+
+Kubernetes exists to automate this type of operational work.
+
+Conceptually:
+
+Desired State
+
+
+"I want 5 API instances."
+
+
+          ↓
+
+
+Kubernetes
+
+
+          ↓
+
+
+Actual State
+
+
+5 API Pods running
+
+This desired-state model is one of the most important concepts in Kubernetes.
+
+LEVEL 4 — Kubernetes Architecture
+
+Learn the cluster architecture deeply.
+
+                 Kubernetes Cluster
+                         │
+          ┌──────────────┴──────────────┐
+          │                             │
+     Control Plane                 Worker Nodes
+          │                             │
+     ┌────┼────┐                 ┌──────┼──────┐
+     │    │    │                 │      │      │
+ API  Scheduler Controllers    kubelet kube-proxy runtime
+Server
+     │
+   etcd
+Control Plane
+API Server
+
+Everything goes through it.
+
+kubectl
+   ↓
+API Server
+etcd
+
+Stores cluster state.
+
+Think:
+
+Cluster database
+Scheduler
+
+Decides:
+
+Which node should run this Pod?
+
+Controller Manager
+
+Continuously compares:
+
+Desired state
+      vs
+Actual state
+
+and makes corrections.
+
+LEVEL 5 — Kubernetes Objects
+
+This is where your Kubernetes vocabulary develops.
+
+Start with:
+
+Pod
+ReplicaSet
+Deployment
+Service
+Namespace
+ConfigMap
+Secret
+
+Then:
+
+StatefulSet
+DaemonSet
+Job
+CronJob
+
+Then:
+
+PersistentVolume
+PersistentVolumeClaim
+StorageClass
+Ingress
+NetworkPolicy
+ServiceAccount
+Role
+RoleBinding
+LEVEL 6 — PODS
+
+A Pod is the basic execution unit.
+
+Example:
+
+apiVersion: v1
+kind: Pod
+
+
+metadata:
+  name: nginx
+
+
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+
+Understand:
+
+Pod
+ └── Container
+
+But also understand why Kubernetes doesn't normally ask you to manually manage Pods.
+
+Because:
+
+Pod
+ ↓
+ReplicaSet
+ ↓
+Deployment
+LEVEL 7 — DEPLOYMENTS
+
+This becomes one of your most-used objects.
+
+Deployment
+      ↓
+ReplicaSet
+      ↓
+Pods
+
+Example:
+
+spec:
+  replicas: 3
+
+Means Kubernetes tries to maintain:
+
+Pod 1
+Pod 2
+Pod 3
+
+Kill one:
+
+Pod 1 ❌
+
+
+        ↓
+
+
+Controller notices
+
+
+        ↓
+
+
+New Pod created
+
+Understand:
+
+rolling updates
+rollout
+rollback
+replica management
+
+Commands:
+
+kubectl get deployments
+kubectl rollout status deployment/app
+kubectl rollout history deployment/app
+kubectl rollout undo deployment/app
+LEVEL 8 — SERVICES
+
+Pods are ephemeral.
+
+Their IPs can change.
+
+So Kubernetes provides Services.
+
+         Service
+            │
+      ┌─────┼─────┐
+      ↓     ↓     ↓
+    Pod   Pod   Pod
+
+Learn:
+
+ClusterIP
+NodePort
+LoadBalancer
+ExternalName
+
+Understand:
+
+Service
+ ↓
+Selector
+ ↓
+Pod labels
+
+This label/selector mechanism is fundamental.
+
+LEVEL 9 — KUBERNETES NETWORKING
+
+Now go deep.
+
+Understand:
+
+Pod → Pod
+Pod → Service
+Pod → Internet
+Internet → Service
+Internet → Ingress → Service → Pod
+
+Learn:
+
+CoreDNS
+
+Kubernetes service discovery.
+
+Conceptually:
+
+api-service
+     ↓
+DNS
+     ↓
+Service IP
+
+Learn:
+
+CNI
+Cluster networking
+Pod CIDR
+Service CIDR
+kube-proxy
+iptables/IPVS
+NetworkPolicy
+
+You don't need to become a network engineer immediately, but you should understand the path packets take.
+
+LEVEL 10 — CONFIGURATION
+
+Never hardcode configuration into your images.
+
+Learn:
+
+ConfigMap
+Secret
+Environment variables
+Volume mounts
+
+Example:
+
+Application
+     ↑
+ConfigMap
+     ↑
+Environment variables
+
+For secrets:
+
+Database password
+API key
+JWT secret
+
+Understand that Kubernetes Secret is not automatically equivalent to fully secure secret management. Later you'll learn external secret systems and cloud secret managers.
+
+LEVEL 11 — STORAGE
+
+Containers are ephemeral.
+
+So:
+
+Container dies
+ ↓
+Container filesystem may disappear
+
+For persistent data:
+
+Pod
+ ↓
+PVC
+ ↓
+PV
+ ↓
+Storage
+
+Learn:
+
+PersistentVolume
+PersistentVolumeClaim
+StorageClass
+Dynamic provisioning
+
+Then understand:
+
+stateless application
+vs
+stateful application
+
+This distinction is critical.
+
+LEVEL 12 — HEALTH CHECKS
+
+Production applications must tell Kubernetes:
+
+Am I alive?
+
+Am I ready to receive traffic?
+
+Learn:
+
+livenessProbe
+readinessProbe
+startupProbe
+
+Example architecture:
+
+Pod starts
+   ↓
+startup probe
+   ↓
+Application ready
+   ↓
+readiness probe
+   ↓
+Traffic allowed
+
+If the application becomes unhealthy:
+
+liveness fails
+      ↓
+Kubernetes restarts container
+LEVEL 13 — RESOURCE MANAGEMENT
+
+Understand:
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+
+
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+Learn the difference between:
+
+Requests
+Limits
+QoS classes
+CPU throttling
+Memory pressure
+OOMKilled
+
+This becomes essential in production.
+
+LEVEL 14 — SCHEDULING
+
+Now understand how Kubernetes chooses nodes.
+
+Learn:
+
+nodeSelector
+nodeAffinity
+podAffinity
+podAntiAffinity
+taints
+tolerations
+topology spread constraints
+
+Example:
+
+GPU Pods
+   ↓
+GPU Node
+
+You can use labels:
+
+accelerator=nvidia
+
+and schedule workloads accordingly.
+
+This will be very relevant to your AI projects.
+
+LEVEL 15 — SCALING
+
+Now learn:
+
+Horizontal Pod Autoscaler
+CPU ↑
+ ↓
+HPA
+ ↓
+Pods 3 → 6
+
+Learn:
+
+HPA
+VPA
+Cluster Autoscaler
+
+And understand the difference between:
+
+Scaling application
+vs
+Scaling infrastructure
+LEVEL 16 — INGRESS
+
+Instead of exposing every application separately:
+
+Internet
+   ↓
+Ingress
+   ├── /api → backend
+   ├── /chat → agent
+   └── /     → frontend
+
+Learn:
+
+Ingress
+Ingress Controller
+TLS
+HTTPS
+Host-based routing
+Path-based routing
+
+In modern production environments, also become familiar with Gateway API.
+
+LEVEL 17 — SECURITY
+
+Now move into serious Kubernetes.
+
+Learn:
+
+Authentication
+Authorization
+RBAC
+ServiceAccounts
+Secrets
+NetworkPolicies
+Pod Security
+SecurityContext
+Capabilities
+Namespaces
+Admission control
+
+Understand:
+
+User
+ ↓
+Authentication
+ ↓
+Authorization
+ ↓
+RBAC
+ ↓
+API Server
+
+Don't give every Pod:
+
+cluster-admin
+
+That's a very important production principle.
+
+LEVEL 18 — OBSERVABILITY
+
+Production Kubernetes needs three major categories:
+
+Metrics
+Logs
+Traces
+
+Learn the ecosystem:
+
+Prometheus
+Grafana
+OpenTelemetry
+Loki / Elasticsearch
+
+Understand:
+
+Application
+    ↓
+Metrics
+    ↓
+Prometheus
+    ↓
+Grafana
+
+And:
+
+Application
+    ↓
+Logs
+    ↓
+Log collector
+    ↓
+Log storage
+LEVEL 19 — TROUBLESHOOTING
+
+This is one of the most important skills.
+
+You should learn how to diagnose:
+
+Pending
+CrashLoopBackOff
+ImagePullBackOff
+ErrImagePull
+OOMKilled
+CreateContainerConfigError
+ContainerCreating
+FailedScheduling
+Readiness probe failed
+
+Your troubleshooting flow should become:
+
+kubectl get
+      ↓
+kubectl describe
+      ↓
+kubectl logs
+      ↓
+kubectl get events
+      ↓
+kubectl exec
+      ↓
+check networking
+      ↓
+check resources
+      ↓
+check configuration
+
+For example:
+
+kubectl get pods
+kubectl describe pod my-api
+kubectl logs my-api
+kubectl logs my-api --previous
+kubectl get events
+
+This is far more valuable than memorizing commands.
+
+LEVEL 20 — HELM
+
+Once you are comfortable with raw YAML:
+
+Deployment.yaml
+Service.yaml
+Ingress.yaml
+ConfigMap.yaml
+
+learn Helm.
+
+Helm gives you reusable deployment packages.
+
+Helm Chart
+    │
+    ├── templates/
+    ├── values.yaml
+    └── Chart.yaml
+
+Understand:
+
+values
+templates
+release
+repository
+upgrade
+rollback
+LEVEL 21 — CI/CD
+
+Now connect Kubernetes to Git.
+
+Your pipeline becomes:
+
+GitHub
+   ↓
+Push
+   ↓
+CI
+   ↓
+Tests
+   ↓
+Docker Build
+   ↓
+Container Registry
+   ↓
+Kubernetes Deployment
+
+Learn:
+
+GitHub Actions
+Docker Registry
+Image tagging
+Deployment strategies
+Rollback
+LEVEL 22 — GITOPS
+
+Then learn the more advanced production model:
+
+Git
+ ↓
+Desired configuration
+ ↓
+GitOps controller
+ ↓
+Kubernetes
+
+Learn:
+
+Argo CD
+Flux
+
+Instead of manually doing:
+
+kubectl apply
+
+every time, your Git repository becomes the source of truth.
+
+LEVEL 23 — CLOUD KUBERNETES
+
+Only after local Kubernetes makes sense, move to cloud.
+
+Learn one provider deeply.
+
+For example:
+
+AWS
+ ↓
+EKS
+
+or:
+
+Azure
+ ↓
+AKS
+
+or:
+
+Google Cloud
+ ↓
+GKE
+
+For a broad career path, Kubernetes concepts matter more than memorizing one provider.
+
+Learn the relationship:
+
+Cloud
+ │
+ ├── VPC
+ ├── Subnets
+ ├── Security Groups
+ ├── Load Balancer
+ ├── IAM
+ ├── Managed Kubernetes
+ └── Object Storage
+LEVEL 24 — PRODUCTION ARCHITECTURE
+
+Now you're getting into real infrastructure engineering.
+
+A typical application might become:
+
+                    Internet
+                       │
+                       ▼
+                DNS / CDN
+                       │
+                       ▼
+               Load Balancer
+                       │
+                       ▼
+                Ingress/Gateway
+                       │
+            ┌──────────┴──────────┐
+            ▼                     ▼
+       Frontend                 API
+                                  │
+                    ┌─────────────┼─────────────┐
+                    ▼             ▼             ▼
+                  Agent         Redis        PostgreSQL
+                    │
+             ┌──────┼──────┐
+             ▼      ▼      ▼
+            LLM    RAG    Tools
+             │
+             ▼
+         Vector DB
+
+Then add:
+
+Monitoring
+Logging
+Tracing
+Secrets
+CI/CD
+Autoscaling
+Backups
+Security
+Disaster Recovery
+LEVEL 25 — HIGH AVAILABILITY
+
+Production means assuming things fail.
+
+Learn:
+
+Pod failure
+Node failure
+Availability Zone failure
+Database failure
+Network failure
+Container failure
+Deployment failure
+
+Understand:
+
+replicas
+anti-affinity
+topology spread
+multiple nodes
+multiple AZs
+PodDisruptionBudget
+rolling updates
+backups
+disaster recovery
+
+Your application should not depend on:
+
+One Pod
+One Node
+One disk
+One availability zone
+LEVEL 26 — PRODUCTION DEPLOYMENT STRATEGIES
+
+Learn:
+
+Rolling deployment
+Blue/Green
+Canary
+Recreate
+
+Example:
+
+v1 → 100%
+
+
+Canary:
+
+
+v1 → 90%
+v2 → 10%
+
+
+Then:
+
+
+v1 → 50%
+v2 → 50%
+
+
+Finally:
+
+
+v2 → 100%
+LEVEL 27 — AI/ML + KUBERNETES
+
+This is where Kubernetes becomes especially relevant to your projects.
+
+Learn:
+
+CPU workloads
+GPU workloads
+Model serving
+Batch inference
+Distributed inference
+GPU scheduling
+Persistent model storage
+Autoscaling
+
+Example:
+
+                Kubernetes
+                    │
+        ┌───────────┼───────────┐
+        ▼           ▼           ▼
+      API         RAG        Worker
+        │           │           │
+        ▼           ▼           ▼
+      Agent     Vector DB     Queue
+        │
+        ▼
+      LLM
+        │
+     GPU Node
+
+Then explore:
+
+NVIDIA device plugin
+GPU scheduling
+KServe
+Ray
+vLLM
+NVIDIA GPU Operator
+The Hands-On Path I Would Give You
+
+Don't learn everything theoretically first.
+
+Build progressively.
+
+Project 1
+
+Hello Kubernetes
+
+Nginx
+ ↓
+Pod
+ ↓
+Service
+
+Learn:
+
+Pod
+kubectl
+Service
+YAML
+Project 2
+
+FastAPI Kubernetes Deployment
+
+FastAPI
+ ↓
+Docker
+ ↓
+Deployment
+ ↓
+Service
+Project 3
+
+FastAPI + PostgreSQL
+
+FastAPI
+    ↓
+Service
+    ↓
+PostgreSQL
+    ↓
+PVC
+
+Learn:
+
+Secrets
+ConfigMaps
+PVC
+Stateful applications
+Project 4
+
+Full-stack application
+
+React
+ ↓
+Ingress
+ ↓
+FastAPI
+ ↓
+PostgreSQL
+Project 5
+
+AI Agent Platform
+
+This should be your major project.
+
+                    Internet
+                       │
+                       ▼
+                  Ingress
+                       │
+                ┌──────┴──────┐
+                ▼             ▼
+             Frontend       API
+                               │
+                        ┌──────┼──────┐
+                        ▼      ▼      ▼
+                      Agent   Redis   RAG
+                        │             │
+                        ▼             ▼
+                       LLM         Vector DB
+                        │
+                        ▼
+                     GPU node
+
+Then add:
+
+Prometheus
+Grafana
+OpenTelemetry
+Helm
+GitHub Actions
+Argo CD
+RBAC
+TLS
+Autoscaling
+
+At that point, you're no longer just "learning Kubernetes."
+
+You're building a production-style platform.
+
+The Kubernetes Knowledge Map
+
+Eventually you should be able to explain all of this:
+
+                    KUBERNETES
+                         │
+       ┌─────────────────┼─────────────────┐
+       │                 │                 │
+   Architecture       Workloads         Networking
+       │                 │                 │
+   API Server          Pods             Services
+   etcd                Deployments      Ingress
+   Scheduler           StatefulSets     DNS
+   Controllers         DaemonSets       NetworkPolicy
+       │                 │                 │
+       ├─────────────────┼─────────────────┤
+       │                 │                 │
+    Storage          Configuration       Security
+       │                 │                 │
+      PV/PVC          ConfigMap           RBAC
+      CSI             Secrets             ServiceAccount
+      StorageClass                         Pod Security
+       │
+       ├───────────────────────────────────┐
+       │                                   │
+   Scaling                            Observability
+       │                                   │
+      HPA                              Metrics
+      VPA                              Logs
+      CA                               Traces
+       │
+       ├───────────────────────────────────┐
+       │                                   │
+      Helm                              CI/CD
+       │                                   │
+     Charts                           GitHub Actions
+     Releases                         Registries
+                                       GitOps
+                                         │
+                                       Argo CD
+                                         │
+                                         ▼
+                                     Production
+                                         │
+                              ┌──────────┼──────────┐
+                              ▼          ▼          ▼
+                           Security   HA/DR     Cloud
+What "Production Ready" Should Mean
+
+You should eventually be capable of answering these questions without guessing:
+
+Application
+
+How do I deploy it?
+
+Networking
+
+How does traffic reach the Pod?
+
+Scaling
+
+What happens when traffic increases?
+
+Failure
+
+What happens when a Pod dies?
+
+Node failure
+
+What happens when a node disappears?
+
+Storage
+
+Where does persistent data live?
+
+Security
+
+Which identity can access which resource?
+
+Observability
+
+How do I know the application is unhealthy?
+
+Deployment
+
+How do I release version 2 without taking down version 1?
+
+Rollback
+
+How do I recover from a bad deployment?
+
+Cost
+
+How much infrastructure am I actually using?
+
+Disaster
+
+What happens if an entire availability zone fails?
+
+Those are the questions that separate Kubernetes tutorial knowledge from production Kubernetes engineering.
