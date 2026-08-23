@@ -13,9 +13,7 @@ import {
   Wrench,
   Users,
   Layers,
-  FileText,
-  Flame,
-  Activity
+  FileText
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -37,17 +35,17 @@ export const Sidebar = ({ overdueCount = 0 }) => {
 
   const staffNav = [
     { to: '/staff/dashboard', label: 'Staff Dashboard', icon: LayoutDashboard },
-    { to: '/staff/my-assigned', label: 'Assigned Complaints', icon: ListOrdered, badge: overdueCount > 0 ? `${overdueCount} Overdue` : null },
+    { to: '/staff/my-assigned', label: 'Assigned Complaints', icon: ListOrdered, badge: overdueCount > 0 ? `${overdueCount}` : null },
     { to: '/notices', label: 'Notice Board', icon: Bell },
   ];
 
   const adminNav = [
-    { to: '/admin/dashboard', label: 'Admin Dashboard', icon: LayoutDashboard, badge: overdueCount > 0 ? `${overdueCount} Overdue` : null },
+    { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: overdueCount > 0 ? `${overdueCount}` : null },
     { to: '/admin/complaints', label: 'All Complaints', icon: ListOrdered },
     { to: '/admin/notices', label: 'Notice Board', icon: Bell },
     { to: '/admin/staff', label: 'Staff Management', icon: Users },
     { to: '/admin/categories', label: 'Category SLAs', icon: Layers },
-    { to: '/admin/audit-logs', label: 'Admin Audit Log', icon: FileText },
+    { to: '/admin/audit-logs', label: 'Audit Log', icon: FileText },
     { to: '/admin/settings', label: 'SLA Settings', icon: Sliders },
   ];
 
@@ -58,9 +56,9 @@ export const Sidebar = ({ overdueCount = 0 }) => {
   return (
     <aside
       style={{
-        width: '260px',
-        backgroundColor: 'var(--bg-secondary)',
-        borderRight: '1px solid var(--border-subtle)',
+        width: '240px',
+        backgroundColor: '#FFFFFF',
+        borderRight: '1px solid #E7E7E9',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -75,40 +73,40 @@ export const Sidebar = ({ overdueCount = 0 }) => {
       <div>
         <div
           style={{
-            padding: '24px 20px',
+            padding: '20px 18px',
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            borderBottom: '1px solid var(--border-subtle)'
+            gap: '10px',
+            borderBottom: '1px solid #E7E7E9'
           }}
         >
           <div
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: 'var(--radius-md)',
-              background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo))',
+              width: '34px',
+              height: '34px',
+              borderRadius: '8px',
+              background: '#FCECED',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ffffff',
-              boxShadow: 'var(--glow-cyan)'
+              color: '#F04B4F',
+              flexShrink: 0
             }}
           >
-            <Building2 size={22} />
+            <Building2 size={20} />
           </div>
           <div>
-            <div style={{ fontWeight: '800', fontFamily: 'var(--font-display)', fontSize: '18px', color: '#ffffff', lineHeight: 1.2 }}>
+            <div style={{ fontWeight: '800', fontFamily: 'var(--font-display)', fontSize: '17px', color: '#222222', lineHeight: 1.1 }}>
               Homely
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--accent-cyan)', fontWeight: '600', letterSpacing: '0.05em' }}>
-              SOCIETY MAINTENANCE
+            <div style={{ fontSize: '11px', color: '#777777', fontWeight: '500' }}>
+              Society Maintenance
             </div>
           </div>
         </div>
 
         {/* Navigation Links */}
-        <nav style={{ padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <nav style={{ padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -119,15 +117,14 @@ export const Sidebar = ({ overdueCount = 0 }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  color: isActive ? '#ffffff' : 'var(--text-secondary)',
-                  background: isActive ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.15), rgba(99, 102, 241, 0.08))' : 'transparent',
-                  border: isActive ? '1px solid var(--border-active)' : '1px solid transparent',
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  color: isActive ? '#F04B4F' : '#777777',
+                  background: isActive ? '#FCECED' : 'transparent',
                   fontWeight: isActive ? '600' : '500',
                   fontSize: '13px',
                   textDecoration: 'none',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.15s ease'
                 })}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -139,11 +136,10 @@ export const Sidebar = ({ overdueCount = 0 }) => {
                   <span
                     style={{
                       fontSize: '10px',
-                      padding: '2px 6px',
+                      padding: '1px 6px',
                       borderRadius: '999px',
-                      background: 'rgba(244, 63, 94, 0.2)',
-                      color: '#fb7185',
-                      border: '1px solid rgba(244, 63, 94, 0.4)',
+                      background: '#F04B4F',
+                      color: '#ffffff',
                       fontWeight: '700'
                     }}
                   >
@@ -159,40 +155,26 @@ export const Sidebar = ({ overdueCount = 0 }) => {
       {/* User Profile / Logout Section */}
       <div
         style={{
-          padding: '16px',
-          borderTop: '1px solid var(--border-subtle)',
-          background: 'rgba(7, 11, 20, 0.4)'
+          padding: '14px 12px',
+          borderTop: '1px solid #E7E7E9',
+          backgroundColor: '#FFFFFF'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', padding: '0 4px' }}>
           <div
             style={{
-              width: '38px',
-              height: '38px',
+              width: '34px',
+              height: '34px',
               borderRadius: '50%',
-              background: isAdmin
-                ? 'rgba(6, 182, 212, 0.2)'
-                : isStaff
-                ? 'rgba(167, 139, 250, 0.2)'
-                : 'rgba(99, 102, 241, 0.2)',
-              border: `1px solid ${
-                isAdmin
-                  ? 'var(--accent-cyan)'
-                  : isStaff
-                  ? '#a78bfa'
-                  : 'var(--accent-indigo)'
-              }`,
+              background: '#FCECED',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: isAdmin
-                ? 'var(--accent-cyan)'
-                : isStaff
-                ? '#a78bfa'
-                : 'var(--accent-indigo)'
+              color: '#F04B4F',
+              flexShrink: 0
             }}
           >
-            {isAdmin ? <ShieldCheck size={20} /> : isStaff ? <Wrench size={20} /> : <User size={20} />}
+            {isAdmin ? <ShieldCheck size={18} /> : isStaff ? <Wrench size={18} /> : <User size={18} />}
           </div>
 
           <div style={{ minWidth: 0, flex: 1 }}>
@@ -200,7 +182,7 @@ export const Sidebar = ({ overdueCount = 0 }) => {
               style={{
                 fontSize: '13px',
                 fontWeight: '600',
-                color: '#ffffff',
+                color: '#222222',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'
@@ -208,9 +190,9 @@ export const Sidebar = ({ overdueCount = 0 }) => {
             >
               {user?.full_name || 'User'}
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '11px', color: '#777777' }}>
               {isAdmin
-                ? 'Admin Office'
+                ? 'Society Admin'
                 : isStaff
                 ? user?.specialization || 'Maintenance Staff'
                 : user?.flat_number || 'Resident'}
@@ -220,10 +202,10 @@ export const Sidebar = ({ overdueCount = 0 }) => {
 
         <button
           onClick={handleLogout}
-          className="btn btn-secondary"
-          style={{ width: '100%', padding: '8px', fontSize: '13px', display: 'flex', gap: '6px' }}
+          className="btn btn-secondary btn-sm"
+          style={{ width: '100%', padding: '7px', fontSize: '12px', display: 'flex', gap: '6px', color: '#777777' }}
         >
-          <LogOut size={15} />
+          <LogOut size={14} />
           <span>Sign Out</span>
         </button>
       </div>

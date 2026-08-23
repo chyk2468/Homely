@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { PlusCircle, ArrowLeft, AlertCircle, CheckCircle2, Wrench } from 'lucide-react';
+import { PlusCircle, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { api } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
 import { PhotoUpload } from '../../components/PhotoUpload';
@@ -57,7 +57,7 @@ export const NewComplaint = () => {
       setSuccess(true);
       setTimeout(() => {
         navigate('/resident/my-complaints');
-      }, 1400);
+      }, 1200);
     } catch (err) {
       setError(err.message || 'Failed to raise complaint.');
     } finally {
@@ -80,7 +80,6 @@ export const NewComplaint = () => {
 
     setLoading(true);
     try {
-      // Check for potential duplicate complaints
       const dupRes = await api.checkDuplicate({
         title: title.trim(),
         category: category,
@@ -95,8 +94,7 @@ export const NewComplaint = () => {
       }
 
       await doSubmitComplaint();
-    } catch (err) {
-      // If duplicate check failed, proceed with direct submission
+    } catch {
       await doSubmitComplaint();
     }
   };
@@ -105,33 +103,41 @@ export const NewComplaint = () => {
     <>
       <Navbar
         title="Raise Maintenance Complaint"
-        subtitle="Submit a service request with description, category SLA, and multiple supporting photos"
+        subtitle="Submit a service request with description, category SLA, and multiple photos"
         extraAction={
           <Link to="/resident/dashboard" className="btn btn-secondary btn-sm">
-            <ArrowLeft size={14} />
-            <span>Back to Dashboard</span>
+            <ArrowLeft size={13} />
+            <span>Dashboard</span>
           </Link>
         }
       />
 
-      <div className="page-body" style={{ maxWidth: '820px' }}>
-        <div className="glass-panel" style={{ padding: '32px' }}>
+      <div className="page-body" style={{ maxWidth: '780px' }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E7E7E9',
+            borderRadius: '12px',
+            padding: '28px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+          }}
+        >
           {error && (
             <div
               style={{
-                background: 'rgba(244, 63, 94, 0.15)',
-                border: '1px solid rgba(244, 63, 94, 0.3)',
-                borderRadius: 'var(--radius-md)',
-                padding: '12px 16px',
-                color: '#fb7185',
+                background: '#FCECED',
+                border: '1px solid #F9D0D2',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                color: '#F04B4F',
                 fontSize: '13px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                marginBottom: '20px'
+                marginBottom: '18px'
               }}
             >
-              <AlertCircle size={16} />
+              <AlertCircle size={16} style={{ flexShrink: 0 }} />
               <div>{error}</div>
             </div>
           )}
@@ -139,20 +145,20 @@ export const NewComplaint = () => {
           {success && (
             <div
               style={{
-                background: 'rgba(16, 185, 129, 0.15)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                borderRadius: 'var(--radius-md)',
-                padding: '14px 16px',
-                color: '#34d399',
-                fontSize: '14px',
+                background: '#EAF7F0',
+                border: '1px solid #C4EDD6',
+                borderRadius: '8px',
+                padding: '12px 14px',
+                color: '#15803D',
+                fontSize: '13px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
-                marginBottom: '20px'
+                gap: '8px',
+                marginBottom: '18px'
               }}
             >
-              <CheckCircle2 size={18} />
-              <div>Complaint submitted successfully! Redirecting to your complaints registry...</div>
+              <CheckCircle2 size={16} />
+              <div>Complaint submitted successfully! Redirecting...</div>
             </div>
           )}
 
@@ -167,7 +173,7 @@ export const NewComplaint = () => {
                 required
               >
                 {categories.map((cat) => (
-                  <option key={cat} value={cat} style={{ background: '#0d1527', color: '#fff' }}>
+                  <option key={cat} value={cat}>
                     {cat}
                   </option>
                 ))}
@@ -176,12 +182,12 @@ export const NewComplaint = () => {
 
             {/* Title Input */}
             <div className="input-group">
-              <label className="input-label">Complaint Title / Summary *</label>
+              <label className="input-label">Complaint Title *</label>
               <input
                 type="text"
                 required
                 className="input-field"
-                placeholder="e.g. Water leak under kitchen sink pipe"
+                placeholder="e.g. Water leakage in kitchen pipeline"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -207,7 +213,7 @@ export const NewComplaint = () => {
             </div>
 
             {/* Actions */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '28px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '24px' }}>
               <Link to="/resident/dashboard" className="btn btn-secondary">
                 Cancel
               </Link>
@@ -216,9 +222,9 @@ export const NewComplaint = () => {
                 type="submit"
                 disabled={loading || success}
                 className="btn btn-primary"
-                style={{ padding: '12px 24px' }}
+                style={{ padding: '10px 20px' }}
               >
-                <PlusCircle size={17} />
+                <PlusCircle size={15} />
                 <span>{loading ? 'Submitting...' : 'Submit Complaint'}</span>
               </button>
             </div>

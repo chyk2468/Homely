@@ -1,51 +1,47 @@
 import React from 'react';
 
-export const StatsCard = ({ title, value, icon: Icon, color = 'cyan', subtitle, alert = false, onClick }) => {
+export const StatsCard = ({ title, value, icon: Icon, color = 'coral', subtitle, alert = false, onClick }) => {
   const colorMap = {
-    cyan: {
-      bg: 'rgba(6, 182, 212, 0.12)',
-      text: 'var(--accent-cyan)',
-      glow: 'var(--glow-cyan)'
+    coral: {
+      bg: '#FCECED',
+      text: '#F04B4F'
     },
     amber: {
-      bg: 'rgba(245, 158, 11, 0.12)',
-      text: 'var(--accent-amber)',
-      glow: '0 0 20px rgba(245, 158, 11, 0.25)'
+      bg: '#FDF6E9',
+      text: '#E5A83B'
     },
     blue: {
-      bg: 'rgba(59, 130, 246, 0.12)',
-      text: 'var(--accent-blue)',
-      glow: '0 0 20px rgba(59, 130, 246, 0.25)'
+      bg: '#EEF2FF',
+      text: '#4F46E5'
     },
     emerald: {
-      bg: 'rgba(16, 185, 129, 0.12)',
-      text: 'var(--accent-emerald)',
-      glow: 'var(--glow-emerald)'
+      bg: '#EAF7F0',
+      text: '#46B878'
     },
     rose: {
-      bg: 'rgba(244, 63, 94, 0.15)',
-      text: 'var(--accent-rose)',
-      glow: 'var(--glow-rose)'
+      bg: '#FCECED',
+      text: '#F04B4F'
     },
     indigo: {
-      bg: 'rgba(99, 102, 241, 0.12)',
-      text: 'var(--accent-indigo)',
-      glow: '0 0 20px rgba(99, 102, 241, 0.25)'
+      bg: '#FCECED',
+      text: '#F04B4F'
     }
   };
 
-  const selectedColor = colorMap[color] || colorMap.cyan;
+  const selectedColor = colorMap[color] || colorMap.coral;
 
   return (
     <div
       className={`glass-panel ${onClick ? 'glass-panel-interactive' : ''}`}
       onClick={onClick}
       style={{
-        padding: '24px',
+        padding: '20px 22px',
         position: 'relative',
         overflow: 'hidden',
         cursor: onClick ? 'pointer' : 'default',
-        border: alert ? '1px solid rgba(244, 63, 94, 0.5)' : undefined
+        border: alert ? '1px solid #F9D0D2' : '1px solid #E7E7E9',
+        backgroundColor: '#FFFFFF',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
       }}
     >
       {alert && (
@@ -56,21 +52,21 @@ export const StatsCard = ({ title, value, icon: Icon, color = 'cyan', subtitle, 
             left: 0,
             right: 0,
             height: '3px',
-            background: 'linear-gradient(90deg, #f43f5e, #fb7185)'
+            background: '#F04B4F'
           }}
         />
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: '#777777', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             {title}
           </div>
-          <div style={{ fontSize: '32px', fontWeight: '800', fontFamily: 'var(--font-display)', color: '#ffffff', marginTop: '6px' }}>
+          <div style={{ fontSize: '28px', fontWeight: '800', fontFamily: 'var(--font-display)', color: '#222222', marginTop: '4px', lineHeight: 1.1 }}>
             {value}
           </div>
           {subtitle && (
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+            <div style={{ fontSize: '12px', color: '#777777', marginTop: '4px' }}>
               {subtitle}
             </div>
           )}
@@ -79,18 +75,18 @@ export const StatsCard = ({ title, value, icon: Icon, color = 'cyan', subtitle, 
         {Icon && (
           <div
             style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: 'var(--radius-md)',
+              width: '42px',
+              height: '42px',
+              borderRadius: '8px',
               background: selectedColor.bg,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: selectedColor.text,
-              boxShadow: selectedColor.glow
+              flexShrink: 0
             }}
           >
-            <Icon size={24} />
+            <Icon size={20} />
           </div>
         )}
       </div>

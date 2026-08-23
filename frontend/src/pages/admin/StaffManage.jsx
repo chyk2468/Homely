@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Wrench, Phone, Mail, CheckCircle2, XCircle, RefreshCw, AlertCircle } from 'lucide-react';
+import { Plus, Phone, Mail, RefreshCw, AlertCircle } from 'lucide-react';
 import { api } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
 import { Modal } from '../../components/Modal';
@@ -75,59 +75,68 @@ export const StaffManage = () => {
     <>
       <Navbar
         title="Maintenance Staff Management"
-        subtitle="Manage in-house technicians, trade specializations, and service dispatch assignments"
+        subtitle="Manage technicians, trade specializations, and service dispatch availability"
         extraAction={
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => setModalOpen(true)} className="btn btn-primary btn-sm">
-              <Plus size={15} />
+              <Plus size={14} />
               <span>Add Staff Member</span>
             </button>
             <button onClick={fetchStaff} className="btn btn-secondary btn-sm" disabled={loading}>
-              <RefreshCw size={14} className={loading ? 'spin' : ''} />
+              <RefreshCw size={13} className={loading ? 'spin' : ''} />
             </button>
           </div>
         }
       />
 
       <div className="page-body">
-        <div className="glass-panel" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ fontSize: '16px', color: '#ffffff', margin: 0 }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E7E7E9',
+            borderRadius: '12px',
+            padding: '20px 24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '15px', color: '#222222', margin: 0, fontWeight: '700' }}>
               Registered Technicians ({staffList.length})
             </h2>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--text-muted)' }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
               Loading staff accounts...
             </div>
           ) : staffList.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-muted)' }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#777777' }}>
               No maintenance staff registered yet. Click "Add Staff Member" to onboard technicians.
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '14px' }}>
               {staffList.map((st) => (
                 <div
                   key={st.id}
-                  className="glass-panel"
                   style={{
-                    padding: '20px',
-                    border: '1px solid var(--border-subtle)',
-                    borderLeft: `4px solid ${st.is_active ? '#a78bfa' : '#64748b'}`
+                    padding: '16px',
+                    borderRadius: '10px',
+                    border: '1px solid #E7E7E9',
+                    borderLeft: `4px solid ${st.is_active ? '#F04B4F' : '#D5D5D8'}`,
+                    backgroundColor: '#FFFFFF'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                     <div>
-                      <h3 style={{ fontSize: '16px', color: '#ffffff', margin: '0 0 2px 0' }}>
+                      <h3 style={{ fontSize: '15px', color: '#222222', margin: '0 0 2px 0', fontWeight: '700' }}>
                         {st.full_name}
                       </h3>
                       <span
                         style={{
                           fontSize: '11px',
-                          background: 'rgba(167, 139, 250, 0.15)',
-                          color: '#a78bfa',
-                          padding: '2px 8px',
+                          background: '#FCECED',
+                          color: '#F04B4F',
+                          padding: '1px 6px',
                           borderRadius: '4px',
                           fontWeight: '700'
                         }}
@@ -141,8 +150,9 @@ export const StaffManage = () => {
                         fontSize: '11px',
                         padding: '2px 8px',
                         borderRadius: '999px',
-                        background: st.is_active ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)',
-                        color: st.is_active ? '#34d399' : '#fb7185',
+                        background: st.is_active ? '#EAF7F0' : '#FCECED',
+                        color: st.is_active ? '#15803D' : '#F04B4F',
+                        border: `1px solid ${st.is_active ? '#C4EDD6' : '#F9D0D2'}`,
                         fontWeight: '700'
                       }}
                     >
@@ -150,25 +160,25 @@ export const StaffManage = () => {
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Mail size={13} color="var(--text-muted)" />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '12px', color: '#777777', marginBottom: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Mail size={12} color="#A0A0A0" />
                       <span>{st.email}</span>
                     </div>
                     {st.phone_number && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Phone size={13} color="var(--text-muted)" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Phone size={12} color="#A0A0A0" />
                         <span>{st.phone_number}</span>
                       </div>
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', paddingTop: '10px', borderTop: '1px solid #E7E7E9' }}>
                     <button
                       type="button"
                       onClick={() => toggleActiveStatus(st)}
                       className="btn btn-secondary btn-sm"
-                      style={{ fontSize: '12px', padding: '4px 10px' }}
+                      style={{ fontSize: '11px', padding: '3px 8px' }}
                     >
                       {st.is_active ? 'Deactivate' : 'Activate'}
                     </button>
@@ -186,21 +196,21 @@ export const StaffManage = () => {
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           title="Onboard Maintenance Staff Member"
-          maxWidth="550px"
+          maxWidth="500px"
         >
           {error && (
             <div
               style={{
-                background: 'rgba(244, 63, 94, 0.15)',
-                border: '1px solid rgba(244, 63, 94, 0.3)',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 14px',
-                color: '#fb7185',
-                fontSize: '13px',
+                background: '#FCECED',
+                border: '1px solid #F9D0D2',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                color: '#F04B4F',
+                fontSize: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                marginBottom: '16px'
+                marginBottom: '14px'
               }}
             >
               <AlertCircle size={15} />
@@ -274,12 +284,12 @@ export const StaffManage = () => {
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
               <button type="button" onClick={() => setModalOpen(false)} className="btn btn-secondary">
                 Cancel
               </button>
               <button type="submit" disabled={saving} className="btn btn-primary">
-                <span>{saving ? 'Creating...' : 'Create Staff Account'}</span>
+                <span>{saving ? 'Creating...' : 'Create Account'}</span>
               </button>
             </div>
           </form>

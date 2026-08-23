@@ -34,7 +34,7 @@ export const NotificationDropdown = () => {
 
   useEffect(() => {
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000); // 30s poll
+    const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -44,7 +44,6 @@ export const NotificationDropdown = () => {
     }
   }, [isOpen]);
 
-  // Click outside listener
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -93,15 +92,15 @@ export const NotificationDropdown = () => {
   const getIcon = (type) => {
     switch (type) {
       case 'IMPORTANT_NOTICE':
-        return <AlertCircle size={15} color="#fb7185" />;
+        return <AlertCircle size={15} color="#F04B4F" />;
       case 'COMMENT':
-        return <MessageSquare size={15} color="#38bdf8" />;
+        return <MessageSquare size={15} color="#4F46E5" />;
       case 'ASSIGNMENT':
-        return <Wrench size={15} color="#a78bfa" />;
+        return <Wrench size={15} color="#F04B4F" />;
       case 'FEEDBACK':
-        return <Sparkles size={15} color="#facc15" />;
+        return <Sparkles size={15} color="#E5A83B" />;
       default:
-        return <Clock size={15} color="#34d399" />;
+        return <Clock size={15} color="#46B878" />;
     }
   };
 
@@ -113,34 +112,35 @@ export const NotificationDropdown = () => {
         style={{
           position: 'relative',
           padding: '8px',
-          borderRadius: '50%',
-          width: '38px',
-          height: '38px',
+          borderRadius: '8px',
+          width: '36px',
+          height: '36px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          color: '#222222'
         }}
         title="Notifications"
       >
-        <Bell size={18} />
+        <Bell size={17} />
         {unreadCount > 0 && (
           <span
             style={{
               position: 'absolute',
               top: '-3px',
               right: '-3px',
-              background: '#f43f5e',
+              background: '#F04B4F',
               color: '#ffffff',
               borderRadius: '999px',
               fontSize: '10px',
               fontWeight: '800',
               padding: '1px 5px',
-              minWidth: '18px',
-              height: '18px',
+              minWidth: '16px',
+              height: '16px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: '2px solid #0f172a'
+              border: '2px solid #ffffff'
             }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -150,38 +150,38 @@ export const NotificationDropdown = () => {
 
       {isOpen && (
         <div
-          className="glass-panel"
           style={{
             position: 'absolute',
-            top: '48px',
+            top: '44px',
             right: 0,
             width: '360px',
-            maxHeight: '440px',
+            maxHeight: '420px',
             zIndex: 1000,
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
+            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.1)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            background: 'rgba(15, 23, 42, 0.95)',
-            border: '1px solid var(--border-medium)'
+            background: '#FFFFFF',
+            borderRadius: '12px',
+            border: '1px solid #E7E7E9'
           }}
         >
           {/* Header */}
           <div
             style={{
-              padding: '14px 18px',
+              padding: '12px 16px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderBottom: '1px solid var(--border-subtle)',
-              background: 'rgba(30, 41, 59, 0.5)'
+              borderBottom: '1px solid #E7E7E9',
+              background: '#FFFFFF'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Bell size={16} color="var(--accent-cyan)" />
-              <span style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff' }}>Notifications</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Bell size={15} color="#F04B4F" />
+              <span style={{ fontSize: '13px', fontWeight: '700', color: '#222222' }}>Notifications</span>
               {unreadCount > 0 && (
-                <span style={{ fontSize: '11px', background: 'rgba(244, 63, 94, 0.2)', color: '#fb7185', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }}>
+                <span style={{ fontSize: '10px', background: '#FCECED', color: '#F04B4F', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
                   {unreadCount} new
                 </span>
               )}
@@ -193,12 +193,13 @@ export const NotificationDropdown = () => {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'var(--accent-cyan)',
-                  fontSize: '12px',
+                  color: '#F04B4F',
+                  fontSize: '11px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '3px',
+                  fontWeight: '600'
                 }}
               >
                 <CheckCheck size={13} />
@@ -210,14 +211,14 @@ export const NotificationDropdown = () => {
           {/* Body */}
           <div style={{ overflowY: 'auto', flex: 1, padding: '6px' }}>
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)', fontSize: '13px' }}>
+              <div style={{ textAlign: 'center', padding: '24px', color: '#777777', fontSize: '12px' }}>
                 Loading updates...
               </div>
             ) : notifications.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--text-muted)' }}>
-                <Check size={28} color="var(--accent-emerald)" style={{ margin: '0 auto 8px' }} />
-                <div style={{ fontSize: '13px', color: '#ffffff', fontWeight: '600' }}>You're all caught up!</div>
-                <div style={{ fontSize: '11px', marginTop: '2px' }}>No new notifications at this time.</div>
+              <div style={{ textAlign: 'center', padding: '32px 16px', color: '#777777' }}>
+                <Check size={24} color="#46B878" style={{ margin: '0 auto 6px' }} />
+                <div style={{ fontSize: '13px', color: '#222222', fontWeight: '600' }}>All caught up!</div>
+                <div style={{ fontSize: '11px', marginTop: '2px', color: '#A0A0A0' }}>No new notifications.</div>
               </div>
             ) : (
               notifications.map((notif) => (
@@ -225,27 +226,27 @@ export const NotificationDropdown = () => {
                   key={notif.id}
                   onClick={() => handleMarkAsRead(notif)}
                   style={{
-                    padding: '10px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    marginBottom: '4px',
+                    padding: '9px 12px',
+                    borderRadius: '6px',
+                    marginBottom: '3px',
                     cursor: 'pointer',
-                    background: notif.is_read ? 'transparent' : 'rgba(6, 182, 212, 0.08)',
-                    borderLeft: notif.is_read ? '2px solid transparent' : '2px solid var(--accent-cyan)',
-                    transition: 'background 0.2s'
+                    background: notif.is_read ? '#FFFFFF' : '#FCECED',
+                    borderLeft: notif.is_read ? '2px solid transparent' : '2px solid #F04B4F',
+                    transition: 'background 0.15s'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                     <div style={{ marginTop: '2px', flexShrink: 0 }}>
                       {getIcon(notif.type)}
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: '13px', fontWeight: notif.is_read ? '600' : '700', color: notif.is_read ? '#cbd5e1' : '#ffffff', marginBottom: '2px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: notif.is_read ? '600' : '700', color: '#222222', marginBottom: '2px' }}>
                         {notif.title}
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.4', marginBottom: '4px' }}>
+                      <div style={{ fontSize: '11px', color: '#777777', lineHeight: '1.3', marginBottom: '3px' }}>
                         {notif.message}
                       </div>
-                      <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                      <div style={{ fontSize: '10px', color: '#A0A0A0' }}>
                         {formatTime(notif.created_at)}
                       </div>
                     </div>

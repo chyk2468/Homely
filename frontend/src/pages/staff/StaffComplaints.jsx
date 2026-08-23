@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, Wrench, RefreshCw, AlertCircle, Eye, Clock, User, Phone } from 'lucide-react';
+import { Search, Wrench, RefreshCw, Phone } from 'lucide-react';
 import { api, API_ROOT } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
 import { StatusBadge } from '../../components/StatusBadge';
@@ -8,10 +8,9 @@ import { PriorityBadge } from '../../components/PriorityBadge';
 import { SLACountdownBadge } from '../../components/SLACountdownBadge';
 import { Modal } from '../../components/Modal';
 import { CommentsThread } from '../../components/CommentsThread';
-import { Timeline } from '../../components/Timeline';
 
 export const StaffComplaints = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -60,7 +59,7 @@ export const StaffComplaints = () => {
       setSelectedComplaint(detail);
       setNewStatus(detail.status);
       setActionNote('');
-    } catch (err) {
+    } catch {
       alert('Failed to load complaint details.');
     }
   };
@@ -83,11 +82,9 @@ export const StaffComplaints = () => {
 
   const formatDate = (isoString) => {
     try {
-      return new Date(isoString).toLocaleString('en-US', {
+      return new Date(isoString).toLocaleDateString('en-US', {
         month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        day: 'numeric'
       });
     } catch {
       return isoString;
@@ -98,10 +95,10 @@ export const StaffComplaints = () => {
     <>
       <Navbar
         title="Assigned Complaints Queue"
-        subtitle="Manage your maintenance assignments, record updates, and resolve service tickets"
+        subtitle="Manage your maintenance assignments, update progress, and resolve work orders"
         extraAction={
           <button onClick={fetchAssigned} className="btn btn-secondary btn-sm" disabled={loading}>
-            <RefreshCw size={14} className={loading ? 'spin' : ''} />
+            <RefreshCw size={13} className={loading ? 'spin' : ''} />
             <span>Refresh</span>
           </button>
         }
@@ -109,9 +106,18 @@ export const StaffComplaints = () => {
 
       <div className="page-body">
         {/* Filter Bar */}
-        <div className="glass-panel" style={{ padding: '18px 24px', marginBottom: '24px' }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E7E7E9',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            marginBottom: '20px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+          }}
+        >
           <form onSubmit={handleSearchSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', alignItems: 'flex-end' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px', alignItems: 'flex-end' }}>
               {/* Search */}
               <div className="input-group" style={{ marginBottom: 0 }}>
                 <label className="input-label">Search</label>
@@ -119,12 +125,12 @@ export const StaffComplaints = () => {
                   <input
                     type="text"
                     className="input-field"
-                    placeholder="Search ID, title, flat, resident..."
+                    placeholder="ID, title, resident..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ paddingLeft: '34px' }}
+                    style={{ paddingLeft: '30px', fontSize: '12px' }}
                   />
-                  <Search size={15} style={{ position: 'absolute', left: '11px', top: '12px', color: 'var(--text-muted)' }} />
+                  <Search size={14} style={{ position: 'absolute', left: '9px', top: '11px', color: '#A0A0A0' }} />
                 </div>
               </div>
 
@@ -135,6 +141,7 @@ export const StaffComplaints = () => {
                   className="select-field"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
+                  style={{ fontSize: '12px' }}
                 >
                   <option value="">All Statuses</option>
                   <option value="Open">Open</option>
@@ -150,11 +157,12 @@ export const StaffComplaints = () => {
                   className="select-field"
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
+                  style={{ fontSize: '12px' }}
                 >
                   <option value="">All Priorities</option>
-                  <option value="High">High Priority</option>
-                  <option value="Medium">Medium Priority</option>
-                  <option value="Low">Low Priority</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
                 </select>
               </div>
 
@@ -165,16 +173,17 @@ export const StaffComplaints = () => {
                   className="select-field"
                   value={isOverdueFilter}
                   onChange={(e) => setIsOverdueFilter(e.target.value)}
+                  style={{ fontSize: '12px' }}
                 >
                   <option value="">All Tickets</option>
-                  <option value="true">🚨 Overdue Only</option>
-                  <option value="false">✅ Within SLA</option>
+                  <option value="true">Overdue Only</option>
+                  <option value="false">Within SLA</option>
                 </select>
               </div>
 
               {/* Search button */}
-              <button type="submit" className="btn btn-primary" style={{ padding: '10px 16px' }}>
-                <Search size={15} />
+              <button type="submit" className="btn btn-primary" style={{ padding: '9px 16px', fontSize: '13px' }}>
+                <Search size={14} />
                 <span>Search</span>
               </button>
             </div>
@@ -182,53 +191,70 @@ export const StaffComplaints = () => {
         </div>
 
         {/* Complaints Table / List */}
-        <div className="glass-panel" style={{ padding: '24px' }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E7E7E9',
+            borderRadius: '12px',
+            padding: '20px 24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '16px', color: '#ffffff', margin: 0 }}>
+            <h2 style={{ fontSize: '15px', color: '#222222', margin: 0, fontWeight: '700' }}>
               Assigned Tickets ({complaints.length})
             </h2>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--text-muted)' }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
               Filtering assigned complaints...
             </div>
           ) : complaints.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 20px' }}>
-              <Wrench size={40} color="var(--text-muted)" style={{ margin: '0 auto 12px' }} />
-              <h3 style={{ fontSize: '16px', color: 'var(--text-primary)', marginBottom: '4px' }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <Wrench size={36} color="#A0A0A0" style={{ margin: '0 auto 10px' }} />
+              <h3 style={{ fontSize: '15px', color: '#222222', marginBottom: '4px' }}>
                 No Matching Complaints
               </h3>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '13px', color: '#777777' }}>
                 Try adjusting your search criteria or filter tags.
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {complaints.map((c) => (
                 <div
                   key={c.id}
-                  className="glass-panel glass-panel-interactive"
                   style={{
-                    padding: '18px 20px',
+                    padding: '14px 18px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '16px',
-                    borderLeft: c.is_overdue && c.status !== 'Resolved' ? '4px solid #f43f5e' : '1px solid var(--border-subtle)'
+                    gap: '14px',
+                    borderRadius: '10px',
+                    border: '1px solid #E7E7E9',
+                    borderLeft: c.is_overdue && c.status !== 'Resolved' ? '4px solid #F04B4F' : '1px solid #E7E7E9',
+                    backgroundColor: '#FFFFFF',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FAFAFA';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FFFFFF';
                   }}
                 >
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--accent-cyan)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: '800', color: '#F04B4F' }}>
                         #{c.id}
                       </span>
                       <span
                         style={{
                           fontSize: '11px',
-                          background: 'rgba(6, 182, 212, 0.15)',
-                          color: 'var(--accent-cyan)',
-                          padding: '2px 8px',
+                          background: '#F3F4F6',
+                          color: '#777777',
+                          padding: '1px 6px',
                           borderRadius: '4px',
                           fontWeight: '600'
                         }}
@@ -236,32 +262,32 @@ export const StaffComplaints = () => {
                         {c.category}
                       </span>
                       {c.resident && (
-                        <span style={{ fontSize: '12px', color: '#818cf8', fontWeight: '600' }}>
+                        <span style={{ fontSize: '12px', color: '#222222', fontWeight: '600' }}>
                           &bull; {c.resident.flat_number} ({c.resident.full_name})
                         </span>
                       )}
                       <SLACountdownBadge complaint={c} />
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      <span style={{ fontSize: '11px', color: '#A0A0A0' }}>
                         &bull; {formatDate(c.created_at)}
                       </span>
                     </div>
 
-                    <div style={{ fontSize: '15px', fontWeight: '600', color: '#ffffff', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#222222', marginBottom: '2px' }}>
                       {c.title}
                     </div>
 
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '12px', color: '#777777', lineHeight: '1.4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {c.description}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                     <PriorityBadge priority={c.priority} />
                     <StatusBadge status={c.status} isOverdue={c.is_overdue} />
                     <button
                       onClick={() => openComplaintModal(c)}
                       className="btn btn-primary btn-sm"
-                      style={{ padding: '8px 14px' }}
+                      style={{ padding: '6px 12px', fontSize: '12px' }}
                     >
                       <span>Manage</span>
                     </button>
@@ -279,56 +305,56 @@ export const StaffComplaints = () => {
           isOpen={!!selectedComplaint}
           onClose={() => setSelectedComplaint(null)}
           title={`Ticket #${selectedComplaint.id}: ${selectedComplaint.title}`}
-          maxWidth="760px"
+          maxWidth="700px"
         >
           <div>
             {/* Resident contact card */}
             <div
               style={{
-                background: 'rgba(13, 21, 39, 0.8)',
-                padding: '14px 18px',
-                borderRadius: 'var(--radius-md)',
-                marginBottom: '20px',
-                border: '1px solid var(--border-subtle)',
+                background: '#F7F7F8',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                border: '1px solid #E7E7E9',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
-                gap: '12px'
+                gap: '10px'
               }}
             >
               <div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Resident Details</div>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: '#777777', textTransform: 'uppercase' }}>Resident Details</div>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#222222', marginTop: '2px' }}>
                   {selectedComplaint.resident?.full_name} &bull; {selectedComplaint.resident?.flat_number}
                 </div>
               </div>
 
               {selectedComplaint.resident?.phone_number && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--accent-cyan)' }}>
-                  <Phone size={14} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#F04B4F', fontWeight: '600' }}>
+                  <Phone size={13} />
                   <span>{selectedComplaint.resident.phone_number}</span>
                 </div>
               )}
             </div>
 
             {/* Description */}
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px', fontWeight: '600' }}>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '11px', color: '#777777', textTransform: 'uppercase', marginBottom: '4px', fontWeight: '600' }}>
                 Description
               </div>
-              <div style={{ background: 'rgba(7, 11, 20, 0.6)', padding: '14px', borderRadius: 'var(--radius-sm)', color: '#f1f5f9', fontSize: '13px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+              <div style={{ background: '#F7F7F8', padding: '12px', borderRadius: '6px', color: '#222222', fontSize: '13px', lineHeight: '1.4', whiteSpace: 'pre-wrap', border: '1px solid #E7E7E9' }}>
                 {selectedComplaint.description}
               </div>
             </div>
 
             {/* Attachments */}
             {selectedComplaint.attachments && selectedComplaint.attachments.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', fontWeight: '600' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ fontSize: '11px', color: '#777777', textTransform: 'uppercase', marginBottom: '6px', fontWeight: '600' }}>
                   Attachments ({selectedComplaint.attachments.length})
                 </div>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {selectedComplaint.attachments.map((att, idx) => (
                     <a
                       key={idx}
@@ -337,11 +363,11 @@ export const StaffComplaints = () => {
                       rel="noopener noreferrer"
                       style={{
                         display: 'block',
-                        width: '120px',
-                        height: '80px',
-                        borderRadius: '4px',
+                        width: '100px',
+                        height: '70px',
+                        borderRadius: '6px',
                         overflow: 'hidden',
-                        border: '1px solid var(--border-medium)'
+                        border: '1px solid #E7E7E9'
                       }}
                     >
                       <img
@@ -356,7 +382,7 @@ export const StaffComplaints = () => {
             )}
 
             {/* Update Form */}
-            <form onSubmit={handleStatusSubmit} style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)' }}>
+            <form onSubmit={handleStatusSubmit} style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #E7E7E9' }}>
               <div className="input-group">
                 <label className="input-label">Update Ticket Status</label>
                 <select
@@ -381,7 +407,7 @@ export const StaffComplaints = () => {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button type="button" onClick={() => setSelectedComplaint(null)} className="btn btn-secondary">
                   Close
                 </button>
@@ -392,7 +418,7 @@ export const StaffComplaints = () => {
             </form>
 
             {/* Discussion Thread */}
-            <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid var(--border-subtle)' }}>
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #E7E7E9' }}>
               <CommentsThread complaintId={selectedComplaint.id} initialComments={selectedComplaint.comments} />
             </div>
           </div>

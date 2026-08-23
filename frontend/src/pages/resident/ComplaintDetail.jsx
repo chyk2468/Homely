@@ -14,7 +14,7 @@ import {
   Star,
   RefreshCcw,
   Wrench,
-  Sparkles
+  ShieldCheck
 } from 'lucide-react';
 import { api, API_ROOT } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
@@ -66,13 +66,13 @@ export const ResidentComplaintDetail = () => {
 
     try {
       await api.postReopenRequest(complaint.id, reopenReason.trim());
-      setReopenSuccess('Reopen request submitted to society administration for review.');
+      setReopenSuccess('Reopen request submitted to administration for review.');
       setReopenReason('');
       fetchDetail();
       setTimeout(() => {
         setReopenModalOpen(false);
         setReopenSuccess('');
-      }, 1500);
+      }, 1400);
     } catch (err) {
       alert(err.message || 'Failed to submit reopen request.');
     } finally {
@@ -97,7 +97,7 @@ export const ResidentComplaintDetail = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-muted)' }}>
+      <div style={{ textAlign: 'center', padding: '80px 0', color: '#777777', fontSize: '13px' }}>
         Loading complaint record...
       </div>
     );
@@ -105,12 +105,12 @@ export const ResidentComplaintDetail = () => {
 
   if (error || !complaint) {
     return (
-      <div className="page-body" style={{ maxWidth: '600px', textAlign: 'center', padding: '60px 0' }}>
-        <AlertCircle size={44} color="var(--accent-rose)" style={{ margin: '0 auto 16px' }} />
-        <h2 style={{ color: '#ffffff' }}>Complaint Not Found</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>{error || 'This complaint may not exist or belongs to another resident.'}</p>
+      <div className="page-body" style={{ maxWidth: '560px', textAlign: 'center', padding: '60px 0' }}>
+        <AlertCircle size={40} color="#F04B4F" style={{ margin: '0 auto 14px' }} />
+        <h2 style={{ color: '#222222', fontSize: '18px' }}>Complaint Not Found</h2>
+        <p style={{ color: '#777777', fontSize: '13px', marginBottom: '20px' }}>{error || 'This complaint may not exist or belongs to another resident.'}</p>
         <Link to="/resident/my-complaints" className="btn btn-secondary">
-          <ArrowLeft size={16} />
+          <ArrowLeft size={14} />
           <span>Back to My Complaints</span>
         </Link>
       </div>
@@ -135,47 +135,48 @@ export const ResidentComplaintDetail = () => {
         subtitle={`Category: ${complaint.category}`}
         extraAction={
           <Link to="/resident/my-complaints" className="btn btn-secondary btn-sm">
-            <ArrowLeft size={14} />
+            <ArrowLeft size={13} />
             <span>All Complaints</span>
           </Link>
         }
       />
 
-      <div className="page-body" style={{ maxWidth: '1000px' }}>
-        {/* Reopen / Feedback Action Bar for Resolved Complaints */}
+      <div className="page-body">
+        {/* Reopen / Feedback Notification if Resolved */}
         {isResolved && (
           <div
-            className="glass-panel"
             style={{
-              padding: '16px 24px',
-              marginBottom: '24px',
-              background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.12), rgba(13, 21, 39, 0.7))',
-              borderLeft: '4px solid var(--accent-emerald)',
+              padding: '14px 20px',
+              marginBottom: '20px',
+              backgroundColor: '#EAF7F0',
+              border: '1px solid #C4EDD6',
+              borderLeft: '4px solid #46B878',
+              borderRadius: '10px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexWrap: 'wrap',
-              gap: '14px'
+              gap: '12px'
             }}
           >
             <div>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff' }}>
-                🎉 Complaint Successfully Resolved
+              <div style={{ fontSize: '14px', fontWeight: '700', color: '#15803D' }}>
+                Complaint Resolved
               </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', color: '#444444', marginTop: '2px' }}>
                 {complaint.resolved_at && `Resolved on ${formatDate(complaint.resolved_at)}. `}
-                {hasFeedback ? `Rated ${complaint.feedback.rating}/5 stars.` : 'How was your service experience?'}
+                {hasFeedback ? `Rated ${complaint.feedback.rating}/5 stars.` : 'Please share your feedback or reopen if the issue persists.'}
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
               {!hasFeedback && (
                 <button
                   onClick={() => setFeedbackOpen(true)}
                   className="btn btn-primary btn-sm"
-                  style={{ display: 'flex', gap: '6px' }}
+                  style={{ display: 'flex', gap: '4px' }}
                 >
-                  <Star size={14} />
+                  <Star size={13} />
                   <span>Rate Satisfaction</span>
                 </button>
               )}
@@ -184,147 +185,269 @@ export const ResidentComplaintDetail = () => {
                 onClick={() => setReopenModalOpen(true)}
                 disabled={pendingReopen}
                 className="btn btn-secondary btn-sm"
-                style={{ display: 'flex', gap: '6px' }}
+                style={{ display: 'flex', gap: '4px' }}
               >
-                <RefreshCcw size={14} />
+                <RefreshCcw size={13} />
                 <span>{pendingReopen ? 'Reopen Under Review' : 'Issue Persists? Reopen'}</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* Main Info Card */}
-        <div className="glass-panel" style={{ padding: '32px', marginBottom: '28px' }}>
-          {/* Top meta */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+        {/* 2-Column Desktop Layout */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '24px', alignItems: 'start' }}>
+          {/* Main Left Section */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
+            {/* Title & Description Card */}
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E7E7E9',
+                borderRadius: '12px',
+                padding: '24px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                 <span
                   style={{
-                    background: 'rgba(6, 182, 212, 0.15)',
-                    color: 'var(--accent-cyan)',
-                    padding: '3px 10px',
+                    backgroundColor: '#FCECED',
+                    color: '#F04B4F',
+                    padding: '2px 8px',
                     borderRadius: '4px',
-                    fontSize: '12px',
+                    fontSize: '11px',
                     fontWeight: '700'
                   }}
                 >
                   {complaint.category}
                 </span>
-                <SLACountdownBadge complaint={complaint} />
-                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  Registered {formatDate(complaint.created_at)}
+                <span style={{ fontSize: '12px', color: '#777777' }}>
+                  Registered on {formatDate(complaint.created_at)}
                 </span>
               </div>
 
-              <h1 style={{ fontSize: '24px', color: '#ffffff', margin: 0 }}>
+              <h1 style={{ fontSize: '20px', color: '#222222', margin: '0 0 16px 0', fontWeight: '700' }}>
                 {complaint.title}
               </h1>
 
-              {complaint.assigned_staff && (
-                <div style={{ fontSize: '13px', color: '#a78bfa', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Wrench size={14} />
-                  <span>Assigned Staff: <strong>{complaint.assigned_staff.full_name}</strong> ({complaint.assigned_staff.specialization})</span>
+              <div
+                style={{
+                  padding: '16px',
+                  borderRadius: '8px',
+                  backgroundColor: '#F7F7F8',
+                  border: '1px solid #E7E7E9'
+                }}
+              >
+                <div style={{ fontSize: '11px', color: '#777777', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px', fontWeight: '700' }}>
+                  Problem Description
+                </div>
+                <div style={{ color: '#222222', fontSize: '13px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                  {complaint.description}
+                </div>
+              </div>
+
+              {/* Photos Gallery */}
+              {allPhotos.length > 0 && (
+                <div style={{ marginTop: '20px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#222222', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ImageIcon size={14} color="#F04B4F" />
+                    <span>Supporting Photos ({allPhotos.length})</span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    {allPhotos.map((imgUrl, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => setLightboxImage(imgUrl)}
+                        style={{
+                          position: 'relative',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          cursor: 'pointer',
+                          border: '1px solid #E7E7E9',
+                          width: '140px',
+                          height: '95px'
+                        }}
+                      >
+                        <img
+                          src={imgUrl}
+                          alt={`Attachment ${idx + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: 'absolute',
+                            bottom: '4px',
+                            right: '4px',
+                            background: 'rgba(0, 0, 0, 0.7)',
+                            padding: '2px 5px',
+                            borderRadius: '3px',
+                            color: '#ffffff',
+                            fontSize: '9px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '2px'
+                          }}
+                        >
+                          <Maximize2 size={9} />
+                          <span>View</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <PriorityBadge priority={complaint.priority} />
-              <StatusBadge status={complaint.status} isOverdue={complaint.is_overdue} />
+            {/* Discussion Thread Card */}
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E7E7E9',
+                borderRadius: '12px',
+                padding: '24px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              }}
+            >
+              <CommentsThread complaintId={complaint.id} initialComments={complaint.comments} />
             </div>
-          </div>
 
-          {/* Description */}
-          <div
-            style={{
-              padding: '20px',
-              borderRadius: 'var(--radius-md)',
-              background: 'rgba(13, 21, 39, 0.7)',
-              border: '1px solid var(--border-subtle)',
-              marginBottom: '24px'
-            }}
-          >
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px', fontWeight: '600' }}>
-              Problem Description
-            </div>
-            <div style={{ color: '#f8fafc', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-              {complaint.description}
-            </div>
-          </div>
-
-          {/* Photos Attachment Gallery */}
-          {allPhotos.length > 0 && (
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ImageIcon size={16} color="var(--accent-cyan)" />
-                <span>Supporting Photos ({allPhotos.length})</span>
+            {/* Lifecycle & Status History Timeline Card */}
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E7E7E9',
+                borderRadius: '12px',
+                padding: '24px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              }}
+            >
+              <div style={{ marginBottom: '14px' }}>
+                <h2 style={{ fontSize: '15px', color: '#222222', margin: 0, fontWeight: '700' }}>Progress Timeline</h2>
+                <p style={{ fontSize: '12px', color: '#777777', margin: '2px 0 0 0' }}>
+                  Audited history of status updates, remarks, and staff assignments
+                </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                {allPhotos.map((imgUrl, idx) => (
+              <Timeline history={complaint.history} />
+            </div>
+          </div>
+
+          {/* Right Section / Info Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Status & Priority Card */}
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E7E7E9',
+                borderRadius: '12px',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              }}
+            >
+              <div style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#777777', marginBottom: '12px', letterSpacing: '0.04em' }}>
+                Ticket Status & SLA
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', color: '#777777' }}>Current Status</span>
+                  <StatusBadge status={complaint.status} isOverdue={complaint.is_overdue} />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', color: '#777777' }}>Priority Level</span>
+                  <PriorityBadge priority={complaint.priority} />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #E7E7E9' }}>
+                  <span style={{ fontSize: '13px', color: '#777777' }}>SLA Target</span>
+                  <SLACountdownBadge complaint={complaint} />
+                </div>
+
+                <div style={{ fontSize: '11px', color: '#A0A0A0', textAlign: 'right' }}>
+                  Category SLA: {complaint.category_sla_days || 7} days
+                </div>
+              </div>
+            </div>
+
+            {/* Assigned Staff Card */}
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E7E7E9',
+                borderRadius: '12px',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              }}
+            >
+              <div style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#777777', marginBottom: '10px', letterSpacing: '0.04em' }}>
+                Assigned Technician
+              </div>
+
+              {complaint.assigned_staff ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div
-                    key={idx}
-                    onClick={() => setLightboxImage(imgUrl)}
                     style={{
-                      position: 'relative',
-                      borderRadius: 'var(--radius-md)',
-                      overflow: 'hidden',
-                      cursor: 'pointer',
-                      border: '1px solid var(--border-medium)',
-                      width: '160px',
-                      height: '110px'
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      backgroundColor: '#FCECED',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#F04B4F',
+                      flexShrink: 0
                     }}
                   >
-                    <img
-                      src={imgUrl}
-                      alt={`Attachment ${idx + 1}`}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        bottom: '4px',
-                        right: '4px',
-                        background: 'rgba(0, 0, 0, 0.75)',
-                        padding: '2px 6px',
-                        borderRadius: '3px',
-                        color: '#ffffff',
-                        fontSize: '10px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '2px'
-                      }}
-                    >
-                      <Maximize2 size={10} />
-                      <span>View</span>
+                    <Wrench size={16} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#222222' }}>
+                      {complaint.assigned_staff.full_name}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#777777' }}>
+                      {complaint.assigned_staff.specialization} Specialist
                     </div>
                   </div>
-                ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '12px', color: '#777777', fontStyle: 'italic' }}>
+                  Staff assignment pending by society administrator.
+                </div>
+              )}
+            </div>
+
+            {/* Resident & Unit Info */}
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E7E7E9',
+                borderRadius: '12px',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              }}
+            >
+              <div style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#777777', marginBottom: '10px', letterSpacing: '0.04em' }}>
+                Resident Unit
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#777777' }}>Resident:</span>
+                  <span style={{ fontWeight: '600', color: '#222222' }}>{complaint.resident_name || 'Resident'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#777777' }}>Flat / Unit:</span>
+                  <span style={{ fontWeight: '600', color: '#222222' }}>{complaint.flat_number || 'N/A'}</span>
+                </div>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Lifecycle & Status History Timeline */}
-        <div className="glass-panel" style={{ padding: '32px', marginBottom: '28px' }}>
-          <div style={{ marginBottom: '20px' }}>
-            <h2 style={{ fontSize: '18px', color: '#ffffff', margin: 0 }}>Progress & Status History</h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-              Chronological immutable audit log of status progressions, staff assignments, and remarks
-            </p>
           </div>
-
-          <Timeline history={complaint.history} />
-        </div>
-
-        {/* Discussion / Comments Section */}
-        <div className="glass-panel" style={{ padding: '32px' }}>
-          <CommentsThread complaintId={complaint.id} initialComments={complaint.comments} />
         </div>
       </div>
 
@@ -337,12 +460,12 @@ export const ResidentComplaintDetail = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0, 0, 0, 0.9)',
+            background: 'rgba(0, 0, 0, 0.85)',
             zIndex: 2000,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '24px'
+            padding: '20px'
           }}
           onClick={() => setLightboxImage(null)}
         >
@@ -355,9 +478,9 @@ export const ResidentComplaintDetail = () => {
             <button
               onClick={() => setLightboxImage(null)}
               className="btn btn-secondary btn-sm"
-              style={{ position: 'absolute', top: '-40px', right: 0, padding: '6px 12px' }}
+              style={{ position: 'absolute', top: '-38px', right: 0, padding: '5px 10px' }}
             >
-              <X size={16} />
+              <X size={15} />
               <span>Close</span>
             </button>
           </div>
@@ -382,17 +505,17 @@ export const ResidentComplaintDetail = () => {
           isOpen={reopenModalOpen}
           onClose={() => setReopenModalOpen(false)}
           title={`Request Reopen: Complaint #${complaint.id}`}
-          maxWidth="550px"
+          maxWidth="500px"
         >
           {reopenSuccess ? (
             <div style={{ textAlign: 'center', padding: '20px' }}>
-              <CheckCircle2 size={36} color="var(--accent-emerald)" style={{ margin: '0 auto 10px' }} />
-              <p style={{ color: '#ffffff', fontSize: '14px' }}>{reopenSuccess}</p>
+              <CheckCircle2 size={32} color="#46B878" style={{ margin: '0 auto 8px' }} />
+              <p style={{ color: '#222222', fontSize: '13px' }}>{reopenSuccess}</p>
             </div>
           ) : (
             <form onSubmit={handleReopenSubmit}>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                If the maintenance issue was not fully resolved or re-occurred, submit a reason for the administration to review and reopen the ticket.
+              <p style={{ fontSize: '13px', color: '#777777', marginBottom: '14px' }}>
+                If the maintenance issue was not fully resolved, describe what remains to be fixed:
               </p>
 
               <div className="input-group">
@@ -401,18 +524,18 @@ export const ResidentComplaintDetail = () => {
                   required
                   rows={4}
                   className="textarea-field"
-                  placeholder="Explain why this issue requires further work..."
+                  placeholder="Explain why this issue requires further maintenance..."
                   value={reopenReason}
                   onChange={(e) => setReopenReason(e.target.value)}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '18px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
                 <button type="button" onClick={() => setReopenModalOpen(false)} className="btn btn-secondary">
                   Cancel
                 </button>
                 <button type="submit" disabled={reopenSubmitting} className="btn btn-primary">
-                  <span>{reopenSubmitting ? 'Submitting...' : 'Submit Reopen Request'}</span>
+                  <span>{reopenSubmitting ? 'Submitting...' : 'Submit Reopen'}</span>
                 </button>
               </div>
             </form>

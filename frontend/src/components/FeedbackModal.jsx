@@ -31,13 +31,13 @@ export const FeedbackModal = ({ isOpen, onClose, complaintId, onSubmitted }) => 
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Rate Resolution Satisfaction" maxWidth="500px">
+    <Modal isOpen={isOpen} onClose={onClose} title="Rate Resolution Satisfaction" maxWidth="480px">
       {success ? (
-        <div style={{ textAlign: 'center', padding: '30px 20px' }}>
-          <CheckCircle2 size={42} color="var(--accent-emerald)" style={{ margin: '0 auto 12px' }} />
-          <h3 style={{ color: '#ffffff', marginBottom: '6px' }}>Thank You!</h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-            Your feedback helps our society maintenance team improve service quality.
+        <div style={{ textAlign: 'center', padding: '24px 16px' }}>
+          <CheckCircle2 size={36} color="#46B878" style={{ margin: '0 auto 10px' }} />
+          <h3 style={{ color: '#222222', fontSize: '16px', marginBottom: '4px' }}>Thank You!</h3>
+          <p style={{ color: '#777777', fontSize: '13px' }}>
+            Your feedback helps our maintenance team improve service quality.
           </p>
         </div>
       ) : (
@@ -45,12 +45,12 @@ export const FeedbackModal = ({ isOpen, onClose, complaintId, onSubmitted }) => 
           {error && (
             <div
               style={{
-                background: 'rgba(244, 63, 94, 0.15)',
-                border: '1px solid rgba(244, 63, 94, 0.3)',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 14px',
-                color: '#fb7185',
-                fontSize: '13px',
+                background: '#FCECED',
+                border: '1px solid #F9D0D2',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                color: '#F04B4F',
+                fontSize: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -62,12 +62,12 @@ export const FeedbackModal = ({ isOpen, onClose, complaintId, onSubmitted }) => 
             </div>
           )}
 
-          <div style={{ textAlign: 'center', margin: '16px 0 24px' }}>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+          <div style={{ textAlign: 'center', margin: '12px 0 20px' }}>
+            <div style={{ fontSize: '13px', color: '#777777', marginBottom: '10px' }}>
               How satisfied are you with the resolution of Complaint #{complaintId}?
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   type="button"
@@ -79,21 +79,21 @@ export const FeedbackModal = ({ isOpen, onClose, complaintId, onSubmitted }) => 
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    padding: '4px',
-                    color: (hoverRating || rating) >= star ? '#facc15' : 'var(--text-muted)',
-                    transform: (hoverRating || rating) >= star ? 'scale(1.15)' : 'scale(1)',
+                    padding: '3px',
+                    color: (hoverRating || rating) >= star ? '#E5A83B' : '#E7E7E9',
+                    transform: (hoverRating || rating) >= star ? 'scale(1.1)' : 'scale(1)',
                     transition: 'all 0.15s ease'
                   }}
                 >
                   <Star
-                    size={32}
-                    fill={(hoverRating || rating) >= star ? '#facc15' : 'transparent'}
+                    size={28}
+                    fill={(hoverRating || rating) >= star ? '#E5A83B' : 'transparent'}
                   />
                 </button>
               ))}
             </div>
 
-            <div style={{ fontSize: '13px', color: '#facc15', fontWeight: '700', marginTop: '8px' }}>
+            <div style={{ fontSize: '12px', color: '#E5A83B', fontWeight: '700', marginTop: '6px' }}>
               {rating === 5 && '⭐⭐⭐⭐⭐ Excellent Resolution'}
               {rating === 4 && '⭐⭐⭐⭐ Good Service'}
               {rating === 3 && '⭐⭐⭐ Satisfactory'}
@@ -103,7 +103,7 @@ export const FeedbackModal = ({ isOpen, onClose, complaintId, onSubmitted }) => 
           </div>
 
           <div className="input-group">
-            <label className="input-label">Optional Comments / Compliments</label>
+            <label className="input-label">Comments (Optional)</label>
             <textarea
               className="textarea-field"
               rows={3}
@@ -113,12 +113,12 @@ export const FeedbackModal = ({ isOpen, onClose, complaintId, onSubmitted }) => 
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '18px' }}>
             <button type="button" onClick={onClose} className="btn btn-secondary">
               Cancel
             </button>
             <button type="submit" disabled={loading} className="btn btn-primary">
-              <Sparkles size={15} />
+              <Sparkles size={14} />
               <span>{loading ? 'Submitting...' : 'Submit Rating'}</span>
             </button>
           </div>

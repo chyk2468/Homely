@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Pin, Calendar, User, AlertCircle, RefreshCw } from 'lucide-react';
+import { Bell, Pin, Calendar, User, RefreshCw } from 'lucide-react';
 import { api } from '../api/client';
 import { Navbar } from '../components/Navbar';
 
@@ -14,7 +14,7 @@ export const NoticeBoard = () => {
     try {
       const data = await api.getNotices();
       setNotices(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load notices.');
     } finally {
       setLoading(false);
@@ -45,7 +45,7 @@ export const NoticeBoard = () => {
         subtitle="Official updates, maintenance schedules, and important announcements"
         extraAction={
           <button onClick={fetchNotices} className="btn btn-secondary btn-sm" disabled={loading}>
-            <RefreshCw size={14} className={loading ? 'spin' : ''} />
+            <RefreshCw size={13} className={loading ? 'spin' : ''} />
             <span>Refresh</span>
           </button>
         }
@@ -55,12 +55,13 @@ export const NoticeBoard = () => {
         {error && (
           <div
             style={{
-              background: 'rgba(244, 63, 94, 0.15)',
-              border: '1px solid rgba(244, 63, 94, 0.3)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px 16px',
-              color: '#fb7185',
-              marginBottom: '20px'
+              background: '#FCECED',
+              border: '1px solid #F9D0D2',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              color: '#F04B4F',
+              marginBottom: '16px',
+              fontSize: '13px'
             }}
           >
             {error}
@@ -68,69 +69,77 @@ export const NoticeBoard = () => {
         )}
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
             Loading announcements...
           </div>
         ) : notices.length === 0 ? (
-          <div className="glass-panel" style={{ padding: '48px', textAlign: 'center' }}>
-            <Bell size={40} color="var(--text-muted)" style={{ margin: '0 auto 16px' }} />
-            <h3 style={{ color: 'var(--text-primary)', marginBottom: '6px' }}>No Notices Posted</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E7E7E9',
+              borderRadius: '12px',
+              padding: '48px 20px',
+              textAlign: 'center'
+            }}
+          >
+            <Bell size={36} color="#A0A0A0" style={{ margin: '0 auto 12px' }} />
+            <h3 style={{ color: '#222222', fontSize: '15px', marginBottom: '4px' }}>No Notices Posted</h3>
+            <p style={{ color: '#777777', fontSize: '13px' }}>
               There are no announcements on the notice board right now.
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {notices.map((notice) => (
               <div
                 key={notice.id}
-                className="glass-panel"
                 style={{
-                  padding: '24px 28px',
-                  position: 'relative',
-                  borderLeft: notice.is_important ? '4px solid #f43f5e' : '1px solid var(--border-subtle)',
-                  background: notice.is_important ? 'rgba(24, 20, 36, 0.85)' : 'var(--bg-card)'
+                  padding: '20px 24px',
+                  borderRadius: '10px',
+                  border: notice.is_important ? '1px solid #F9D0D2' : '1px solid #E7E7E9',
+                  borderLeft: notice.is_important ? '4px solid #F04B4F' : '1px solid #E7E7E9',
+                  backgroundColor: notice.is_important ? '#FCECED' : '#FFFFFF',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
                 }}
               >
                 {/* Header row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     {notice.is_important && (
                       <span
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px',
-                          background: 'rgba(244, 63, 94, 0.2)',
-                          color: '#fb7185',
-                          border: '1px solid rgba(244, 63, 94, 0.4)',
-                          padding: '3px 8px',
+                          gap: '3px',
+                          background: '#FFFFFF',
+                          color: '#F04B4F',
+                          border: '1px solid #F9D0D2',
+                          padding: '2px 6px',
                           borderRadius: '4px',
-                          fontSize: '11px',
+                          fontSize: '10px',
                           fontWeight: '700',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
+                          textTransform: 'uppercase'
                         }}
                       >
-                        <Pin size={12} />
+                        <Pin size={10} />
                         <span>Pinned Notice</span>
                       </span>
                     )}
 
-                    <h2 style={{ fontSize: '18px', margin: 0, color: notice.is_important ? '#ffffff' : 'var(--text-primary)' }}>
+                    <h2 style={{ fontSize: '16px', margin: 0, color: '#222222', fontWeight: '700' }}>
                       {notice.title}
                     </h2>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '11px', color: '#777777' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Calendar size={13} />
+                      <Calendar size={12} color="#A0A0A0" />
                       <span>{formatDate(notice.created_at)}</span>
                     </div>
                     {notice.author && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <User size={13} />
-                        <span>{notice.author.full_name}</span>
+                        <User size={12} color="#A0A0A0" />
+                        <span>By {notice.author.full_name}</span>
                       </div>
                     )}
                   </div>
@@ -139,11 +148,11 @@ export const NoticeBoard = () => {
                 {/* Content */}
                 <div
                   style={{
-                    color: '#e2e8f0',
-                    fontSize: '14px',
-                    lineHeight: '1.65',
+                    color: '#333333',
+                    fontSize: '13px',
+                    lineHeight: '1.5',
                     whiteSpace: 'pre-wrap',
-                    marginTop: '8px'
+                    marginTop: '6px'
                   }}
                 >
                   {notice.content}

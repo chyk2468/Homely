@@ -36,7 +36,7 @@ export const NoticeManage = () => {
     try {
       const data = await api.getNotices();
       setNotices(data);
-    } catch (err) {
+    } catch {
       setError('Failed to fetch notices.');
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ export const NoticeManage = () => {
       });
       setSuccess(
         isImportant
-          ? 'Notice created and broadcast email sent to all residents!'
+          ? 'Notice published and broadcast notification dispatched to residents!'
           : 'Notice published successfully.'
       );
       setTitle('');
@@ -103,7 +103,7 @@ export const NoticeManage = () => {
       await api.deleteNotice(id);
       setSuccess('Notice deleted.');
       fetchNotices();
-    } catch (err) {
+    } catch {
       setError('Failed to delete notice.');
     }
   };
@@ -124,10 +124,10 @@ export const NoticeManage = () => {
     <>
       <Navbar
         title="Notice Board Management"
-        subtitle="Publish community updates, maintenance warnings, and broadcast urgent alerts to residents"
+        subtitle="Publish community updates, maintenance alerts, and broadcast urgent notices"
         extraAction={
           <button onClick={() => setShowCreateModal(true)} className="btn btn-primary btn-sm">
-            <PlusCircle size={15} />
+            <PlusCircle size={14} />
             <span>Post New Notice</span>
           </button>
         }
@@ -137,16 +137,16 @@ export const NoticeManage = () => {
         {success && (
           <div
             style={{
-              background: 'rgba(16, 185, 129, 0.15)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px 16px',
-              color: '#34d399',
+              background: '#EAF7F0',
+              border: '1px solid #C4EDD6',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              color: '#15803D',
               fontSize: '13px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              marginBottom: '20px'
+              marginBottom: '16px'
             }}
           >
             <CheckCircle2 size={16} />
@@ -157,16 +157,16 @@ export const NoticeManage = () => {
         {error && (
           <div
             style={{
-              background: 'rgba(244, 63, 94, 0.15)',
-              border: '1px solid rgba(244, 63, 94, 0.3)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px 16px',
-              color: '#fb7185',
+              background: '#FCECED',
+              border: '1px solid #F9D0D2',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              color: '#F04B4F',
               fontSize: '13px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              marginBottom: '20px'
+              marginBottom: '16px'
             }}
           >
             <AlertCircle size={16} />
@@ -176,94 +176,104 @@ export const NoticeManage = () => {
 
         {/* Notices List */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
             Loading announcements...
           </div>
         ) : notices.length === 0 ? (
-          <div className="glass-panel" style={{ padding: '60px 20px', textAlign: 'center' }}>
-            <Bell size={40} color="var(--text-muted)" style={{ margin: '0 auto 16px' }} />
-            <h3 style={{ color: 'var(--text-primary)', marginBottom: '6px' }}>No Notices Active</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E7E7E9',
+              borderRadius: '12px',
+              padding: '48px 20px',
+              textAlign: 'center'
+            }}
+          >
+            <Bell size={36} color="#A0A0A0" style={{ margin: '0 auto 12px' }} />
+            <h3 style={{ color: '#222222', fontSize: '15px', marginBottom: '4px' }}>No Notices Active</h3>
+            <p style={{ color: '#777777', fontSize: '13px', marginBottom: '16px' }}>
               Publish an announcement to notify society residents.
             </p>
             <button onClick={() => setShowCreateModal(true)} className="btn btn-primary btn-sm">
-              <PlusCircle size={15} />
+              <PlusCircle size={14} />
               <span>Post Notice</span>
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {notices.map((notice) => (
               <div
                 key={notice.id}
-                className="glass-panel"
                 style={{
-                  padding: '24px',
-                  borderLeft: notice.is_important ? '4px solid #f43f5e' : '1px solid var(--border-subtle)',
-                  background: notice.is_important ? 'rgba(24, 20, 36, 0.85)' : 'var(--bg-card)'
+                  padding: '18px 20px',
+                  borderRadius: '10px',
+                  border: notice.is_important ? '1px solid #F9D0D2' : '1px solid #E7E7E9',
+                  borderLeft: notice.is_important ? '4px solid #F04B4F' : '1px solid #E7E7E9',
+                  backgroundColor: notice.is_important ? '#FCECED' : '#FFFFFF',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     {notice.is_important && (
                       <span
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px',
-                          background: 'rgba(244, 63, 94, 0.2)',
-                          color: '#fb7185',
-                          border: '1px solid rgba(244, 63, 94, 0.4)',
-                          padding: '3px 8px',
+                          gap: '3px',
+                          background: '#FFFFFF',
+                          color: '#F04B4F',
+                          border: '1px solid #F9D0D2',
+                          padding: '2px 6px',
                           borderRadius: '4px',
-                          fontSize: '11px',
+                          fontSize: '10px',
                           fontWeight: '700',
                           textTransform: 'uppercase'
                         }}
                       >
-                        <Pin size={12} />
-                        <span>Pinned Important</span>
+                        <Pin size={10} />
+                        <span>Important</span>
                       </span>
                     )}
 
-                    <h3 style={{ fontSize: '18px', margin: 0, color: '#ffffff' }}>
+                    <h3 style={{ fontSize: '15px', margin: 0, color: '#222222', fontWeight: '700' }}>
                       {notice.title}
                     </h3>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <button
                       onClick={() => setEditingNotice(notice)}
                       className="btn btn-secondary btn-sm"
-                      style={{ padding: '6px 10px' }}
+                      style={{ padding: '4px 8px', fontSize: '11px' }}
                       title="Edit Notice"
                     >
-                      <Edit2 size={14} />
+                      <Edit2 size={12} />
                       <span>Edit</span>
                     </button>
                     <button
                       onClick={() => handleDelete(notice.id)}
                       className="btn btn-danger btn-sm"
-                      style={{ padding: '6px 10px' }}
+                      style={{ padding: '4px 8px', fontSize: '11px' }}
                       title="Delete Notice"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={12} />
                     </button>
                   </div>
                 </div>
 
-                <div style={{ color: '#e2e8f0', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+                <div style={{ color: '#333333', fontSize: '13px', lineHeight: '1.5', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
                   {notice.content}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Calendar size={13} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '11px', color: '#777777', borderTop: '1px solid #E7E7E9', paddingTop: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <Calendar size={11} color="#A0A0A0" />
                     <span>Posted {formatDate(notice.created_at)}</span>
                   </div>
                   {notice.author && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <User size={13} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                      <User size={11} color="#A0A0A0" />
                       <span>By {notice.author.full_name}</span>
                     </div>
                   )}
@@ -280,7 +290,7 @@ export const NoticeManage = () => {
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           title="Publish Community Notice"
-          maxWidth="600px"
+          maxWidth="560px"
         >
           <form onSubmit={handleCreate}>
             <div className="input-group">
@@ -301,7 +311,7 @@ export const NoticeManage = () => {
                 required
                 className="textarea-field"
                 rows={5}
-                placeholder="Write the full announcement details, dates, affected blocks..."
+                placeholder="Write the announcement details, dates, affected blocks..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
               />
@@ -312,12 +322,12 @@ export const NoticeManage = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                padding: '14px 16px',
-                borderRadius: 'var(--radius-md)',
-                background: 'rgba(244, 63, 94, 0.1)',
-                border: '1px solid rgba(244, 63, 94, 0.25)',
-                marginBottom: '20px',
+                gap: '10px',
+                padding: '12px 14px',
+                borderRadius: '8px',
+                background: '#FCECED',
+                border: '1px solid #F9D0D2',
+                marginBottom: '18px',
                 cursor: 'pointer'
               }}
               onClick={() => setIsImportant(!isImportant)}
@@ -326,19 +336,19 @@ export const NoticeManage = () => {
                 type="checkbox"
                 checked={isImportant}
                 onChange={(e) => setIsImportant(e.target.checked)}
-                style={{ width: '18px', height: '18px', accentColor: '#f43f5e', cursor: 'pointer' }}
+                style={{ width: '16px', height: '16px', accentColor: '#F04B4F', cursor: 'pointer' }}
               />
               <div>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#ffffff' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#222222' }}>
                   Mark as Important & Pin to Top
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  Pins this notice at the top and sends an automatic email notification to all residents
+                <div style={{ fontSize: '11px', color: '#777777' }}>
+                  Pins notice to top and sends notification to all residents
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
@@ -351,8 +361,8 @@ export const NoticeManage = () => {
                 disabled={submitting}
                 className="btn btn-primary"
               >
-                <Send size={15} />
-                <span>{submitting ? 'Publishing...' : 'Publish Announcement'}</span>
+                <Send size={14} />
+                <span>{submitting ? 'Publishing...' : 'Publish'}</span>
               </button>
             </div>
           </form>
@@ -365,7 +375,7 @@ export const NoticeManage = () => {
           isOpen={!!editingNotice}
           onClose={() => setEditingNotice(null)}
           title="Edit Notice Announcement"
-          maxWidth="600px"
+          maxWidth="560px"
         >
           <form onSubmit={handleUpdate}>
             <div className="input-group">
@@ -394,12 +404,12 @@ export const NoticeManage = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                padding: '14px 16px',
-                borderRadius: 'var(--radius-md)',
-                background: 'rgba(244, 63, 94, 0.1)',
-                border: '1px solid rgba(244, 63, 94, 0.25)',
-                marginBottom: '20px',
+                gap: '10px',
+                padding: '12px 14px',
+                borderRadius: '8px',
+                background: '#FCECED',
+                border: '1px solid #F9D0D2',
+                marginBottom: '18px',
                 cursor: 'pointer'
               }}
               onClick={() => setEditingNotice({ ...editingNotice, is_important: !editingNotice.is_important })}
@@ -408,16 +418,16 @@ export const NoticeManage = () => {
                 type="checkbox"
                 checked={editingNotice.is_important}
                 onChange={(e) => setEditingNotice({ ...editingNotice, is_important: e.target.checked })}
-                style={{ width: '18px', height: '18px', accentColor: '#f43f5e', cursor: 'pointer' }}
+                style={{ width: '16px', height: '16px', accentColor: '#F04B4F', cursor: 'pointer' }}
               />
               <div>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#ffffff' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#222222' }}>
                   Pin to Top as Important
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
               <button
                 type="button"
                 onClick={() => setEditingNotice(null)}

@@ -12,12 +12,12 @@ export const SLACountdownBadge = ({ complaint }) => {
           alignItems: 'center',
           gap: '4px',
           padding: '3px 8px',
-          borderRadius: '4px',
+          borderRadius: '999px',
           fontSize: '11px',
           fontWeight: '600',
-          background: 'rgba(16, 185, 129, 0.12)',
-          color: '#34d399',
-          border: '1px solid rgba(16, 185, 129, 0.25)'
+          background: '#EAF7F0',
+          color: '#15803D',
+          border: '1px solid #C4EDD6'
         }}
       >
         <CheckCircle size={11} />
@@ -29,20 +29,20 @@ export const SLACountdownBadge = ({ complaint }) => {
   const text = complaint.sla_remaining_text || (complaint.is_overdue ? 'Overdue' : 'On Schedule');
   const status = complaint.sla_status || (complaint.is_overdue ? 'overdue' : 'normal');
 
-  let bg = 'rgba(6, 182, 212, 0.12)';
-  let border = 'rgba(6, 182, 212, 0.3)';
-  let color = '#38bdf8';
+  let bg = '#F3F4F6';
+  let border = '#E5E7EB';
+  let color = '#4B5563';
   let Icon = Clock;
 
   if (status === 'overdue' || complaint.is_overdue) {
-    bg = 'rgba(244, 63, 94, 0.15)';
-    border = 'rgba(244, 63, 94, 0.4)';
-    color = '#fb7185';
+    bg = '#FCECED';
+    border = '#F9D0D2';
+    color = '#F04B4F';
     Icon = Flame;
   } else if (status === 'approaching') {
-    bg = 'rgba(245, 158, 11, 0.15)';
-    border = 'rgba(245, 158, 11, 0.35)';
-    color = '#fbbf24';
+    bg = '#FDF6E9';
+    border = '#F8E3BC';
+    color = '#B45309';
     Icon = AlertTriangle;
   }
 
@@ -53,13 +53,12 @@ export const SLACountdownBadge = ({ complaint }) => {
         alignItems: 'center',
         gap: '4px',
         padding: '3px 8px',
-        borderRadius: '4px',
+        borderRadius: '999px',
         fontSize: '11px',
-        fontWeight: '700',
+        fontWeight: '600',
         background: bg,
         color: color,
-        border: `1px solid ${border}`,
-        letterSpacing: '0.02em'
+        border: `1px solid ${border}`
       }}
       title={`Category SLA: ${complaint.category_sla_days || 7} days`}
     >

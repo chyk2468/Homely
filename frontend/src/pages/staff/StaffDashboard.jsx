@@ -8,8 +8,7 @@ import {
   ListOrdered,
   Flame,
   ArrowRight,
-  RefreshCw,
-  Bell
+  RefreshCw
 } from 'lucide-react';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
@@ -19,14 +18,12 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { PriorityBadge } from '../../components/PriorityBadge';
 import { SLACountdownBadge } from '../../components/SLACountdownBadge';
 import { Modal } from '../../components/Modal';
-import { Timeline } from '../../components/Timeline';
 import { CommentsThread } from '../../components/CommentsThread';
 
 export const StaffDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [complaints, setComplaints] = useState([]);
-  const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Manage modal
@@ -38,12 +35,8 @@ export const StaffDashboard = () => {
   const fetchStaffData = async () => {
     setLoading(true);
     try {
-      const [complaintsData, noticesData] = await Promise.all([
-        api.getStaffComplaints(),
-        api.getNotices()
-      ]);
+      const complaintsData = await api.getStaffComplaints();
       setComplaints(complaintsData);
-      setNotices(noticesData);
     } catch (err) {
       console.error('Failed to load staff dashboard:', err);
     } finally {
@@ -67,7 +60,7 @@ export const StaffDashboard = () => {
       setSelectedComplaint(detail);
       setNewStatus(detail.status);
       setActionNote('');
-    } catch (err) {
+    } catch {
       alert('Failed to load complaint details.');
     }
   };
@@ -106,7 +99,7 @@ export const StaffDashboard = () => {
         subtitle={`Logged in as ${user?.full_name} (${user?.specialization || 'Maintenance Specialist'})`}
         extraAction={
           <button onClick={fetchStaffData} className="btn btn-secondary btn-sm" disabled={loading}>
-            <RefreshCw size={14} className={loading ? 'spin' : ''} />
+            <RefreshCw size={13} className={loading ? 'spin' : ''} />
             <span>Refresh</span>
           </button>
         }
@@ -116,33 +109,34 @@ export const StaffDashboard = () => {
         {/* Overdue Alert Banner if any */}
         {overdueCount > 0 && (
           <div
-            className="glass-panel"
             style={{
-              padding: '16px 20px',
-              marginBottom: '28px',
-              borderLeft: '4px solid #f43f5e',
-              background: 'linear-gradient(90deg, rgba(244, 63, 94, 0.15), rgba(13, 21, 39, 0.7))',
+              padding: '14px 18px',
+              marginBottom: '20px',
+              borderLeft: '4px solid #F04B4F',
+              background: '#FCECED',
+              borderRadius: '10px',
+              border: '1px solid #F9D0D2',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '16px'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Flame size={22} color="#fb7185" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Flame size={20} color="#F04B4F" />
               <div>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff' }}>
-                  🚨 You have {overdueCount} assigned ticket{overdueCount > 1 ? 's' : ''} past SLA deadline
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#F04B4F' }}>
+                  {overdueCount} Assigned Ticket{overdueCount > 1 ? 's' : ''} Overdue
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  Please prioritize these overdue requests to restore compliance.
+                <div style={{ fontSize: '12px', color: '#777777' }}>
+                  Please prioritize overdue requests to meet society SLA compliance.
                 </div>
               </div>
             </div>
 
-            <Link to="/staff/my-assigned?is_overdue=true" className="btn btn-danger btn-sm">
+            <Link to="/staff/my-assigned?is_overdue=true" className="btn btn-danger btn-sm" style={{ padding: '5px 10px', fontSize: '12px' }}>
               <span>Review Overdue</span>
-              <ArrowRight size={13} />
+              <ArrowRight size={12} />
             </Link>
           </div>
         )}
@@ -151,24 +145,24 @@ export const StaffDashboard = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '20px',
-            marginBottom: '32px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '16px',
+            marginBottom: '24px'
           }}
         >
           <StatsCard
             title="Assigned Tickets"
             value={totalAssigned}
             icon={ListOrdered}
-            color="indigo"
-            subtitle="Assigned to your queue"
+            color="coral"
+            subtitle="Your active queue"
             onClick={() => navigate('/staff/my-assigned')}
           />
           <StatsCard
             title="Pending Dispatch"
             value={openCount}
             icon={AlertCircle}
-            color="amber"
+            color="coral"
             subtitle="Action required"
             onClick={() => navigate('/staff/my-assigned?status=Open')}
           />
@@ -176,8 +170,8 @@ export const StaffDashboard = () => {
             title="In Progress"
             value={inProgressCount}
             icon={Clock}
-            color="blue"
-            subtitle="Under active work"
+            color="amber"
+            subtitle="Work underway"
             onClick={() => navigate('/staff/my-assigned?status=In+Progress')}
           />
           <StatsCard
@@ -191,82 +185,99 @@ export const StaffDashboard = () => {
         </div>
 
         {/* Assigned Tickets Section */}
-        <div className="glass-panel" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E7E7E9',
+            borderRadius: '12px',
+            padding: '20px 24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h2 style={{ fontSize: '18px', color: '#ffffff', margin: 0 }}>My Active Queue</h2>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
-                Operational maintenance jobs requiring your inspection and work
+              <h2 style={{ fontSize: '16px', color: '#222222', margin: 0, fontWeight: '700' }}>My Assigned Queue</h2>
+              <p style={{ fontSize: '12px', color: '#777777', margin: '2px 0 0 0' }}>
+                Maintenance work orders requiring inspection and service
               </p>
             </div>
 
             <Link to="/staff/my-assigned" className="btn btn-secondary btn-sm">
-              <span>View All Assigned</span>
-              <ArrowRight size={14} />
+              <span>View All</span>
+              <ArrowRight size={13} />
             </Link>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+            <div style={{ textAlign: 'center', padding: '32px 0', color: '#777777', fontSize: '13px' }}>
               Loading assigned queue...
             </div>
           ) : complaints.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 20px' }}>
-              <Wrench size={36} color="var(--text-muted)" style={{ margin: '0 auto 12px' }} />
-              <h3 style={{ fontSize: '16px', color: 'var(--text-primary)', marginBottom: '6px' }}>
+            <div style={{ textAlign: 'center', padding: '36px 20px' }}>
+              <Wrench size={32} color="#A0A0A0" style={{ margin: '0 auto 10px' }} />
+              <h3 style={{ fontSize: '15px', color: '#222222', marginBottom: '4px' }}>
                 Queue is Clear!
               </h3>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '13px', color: '#777777' }}>
                 No active complaints assigned to your account right now.
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {complaints.slice(0, 6).map((item) => (
                 <div
                   key={item.id}
-                  className="glass-panel glass-panel-interactive"
                   style={{
-                    padding: '16px 20px',
+                    padding: '14px 18px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '16px',
-                    borderLeft: item.is_overdue && item.status !== 'Resolved' ? '4px solid #f43f5e' : '1px solid var(--border-subtle)'
+                    gap: '14px',
+                    borderRadius: '10px',
+                    border: '1px solid #E7E7E9',
+                    borderLeft: item.is_overdue && item.status !== 'Resolved' ? '4px solid #F04B4F' : '1px solid #E7E7E9',
+                    backgroundColor: '#FFFFFF',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FAFAFA';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FFFFFF';
                   }}
                 >
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '12px', color: 'var(--accent-cyan)', fontWeight: '700' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
+                      <span style={{ fontSize: '12px', color: '#F04B4F', fontWeight: '700' }}>
                         #{item.id} &bull; {item.category}
                       </span>
                       {item.resident && (
-                        <span style={{ fontSize: '12px', color: 'var(--accent-indigo)', fontWeight: '600' }}>
+                        <span style={{ fontSize: '12px', color: '#222222', fontWeight: '600' }}>
                           &bull; {item.resident.flat_number} ({item.resident.full_name})
                         </span>
                       )}
                       <SLACountdownBadge complaint={item} />
-                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                      <span style={{ fontSize: '11px', color: '#A0A0A0' }}>
                         &bull; {formatDate(item.created_at)}
                       </span>
                     </div>
 
-                    <div style={{ fontSize: '15px', fontWeight: '600', color: '#ffffff', marginBottom: '2px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#222222', marginBottom: '2px' }}>
                       {item.title}
                     </div>
 
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '12px', color: '#777777', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.description}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                     <PriorityBadge priority={item.priority} />
                     <StatusBadge status={item.status} isOverdue={item.is_overdue} />
                     <button
                       onClick={() => openManageModal(item)}
                       className="btn btn-primary btn-sm"
-                      style={{ padding: '8px 14px' }}
+                      style={{ padding: '6px 12px', fontSize: '12px' }}
                     >
                       Update Job
                     </button>
@@ -284,25 +295,26 @@ export const StaffDashboard = () => {
           isOpen={!!selectedComplaint}
           onClose={() => setSelectedComplaint(null)}
           title={`Update Job: Complaint #${selectedComplaint.id}`}
-          maxWidth="700px"
+          maxWidth="640px"
         >
           <div>
-            <div style={{ marginBottom: '16px' }}>
-              <h4 style={{ fontSize: '16px', color: '#ffffff', margin: '0 0 4px 0' }}>{selectedComplaint.title}</h4>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <div style={{ marginBottom: '14px' }}>
+              <h4 style={{ fontSize: '15px', color: '#222222', margin: '0 0 2px 0', fontWeight: '700' }}>{selectedComplaint.title}</h4>
+              <div style={{ fontSize: '12px', color: '#777777' }}>
                 Resident: <strong>{selectedComplaint.resident?.full_name}</strong> &bull; Flat: <strong>{selectedComplaint.resident?.flat_number}</strong> &bull; Phone: <strong>{selectedComplaint.resident?.phone_number || 'N/A'}</strong>
               </div>
             </div>
 
             <div
               style={{
-                background: 'rgba(13, 21, 39, 0.7)',
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '13px',
-                color: 'var(--text-secondary)',
+                backgroundColor: '#F7F7F8',
+                padding: '12px 14px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                color: '#444444',
                 lineHeight: '1.5',
-                marginBottom: '20px'
+                marginBottom: '16px',
+                border: '1px solid #E7E7E9'
               }}
             >
               {selectedComplaint.description}
@@ -323,17 +335,17 @@ export const StaffDashboard = () => {
               </div>
 
               <div className="input-group">
-                <label className="input-label">Operational Notes / Work Completed (Resident & Admin will be notified)</label>
+                <label className="input-label">Operational Notes / Work Done</label>
                 <textarea
                   className="textarea-field"
                   rows={3}
-                  placeholder="e.g. Inspected valve and replaced rubber washer. Tested water pressure."
+                  placeholder="e.g. Replaced leaking valve gasket. Tested water flow."
                   value={actionNote}
                   onChange={(e) => setActionNote(e.target.value)}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button type="button" onClick={() => setSelectedComplaint(null)} className="btn btn-secondary">
                   Cancel
                 </button>
@@ -344,7 +356,7 @@ export const StaffDashboard = () => {
             </form>
 
             {/* Comments Thread inside modal */}
-            <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)' }}>
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #E7E7E9' }}>
               <CommentsThread complaintId={selectedComplaint.id} initialComments={selectedComplaint.comments} />
             </div>
           </div>

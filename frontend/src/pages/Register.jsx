@@ -62,50 +62,57 @@ export const Register = () => {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '24px',
-        background: 'radial-gradient(circle at 50% 30%, rgba(99, 102, 241, 0.12) 0%, rgba(7, 11, 20, 1) 70%)'
+        backgroundColor: '#F7F7F8'
       }}
     >
-      <div style={{ width: '100%', maxWidth: '480px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+      <div style={{ width: '100%', maxWidth: '460px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div
             style={{
-              width: '52px',
-              height: '52px',
-              borderRadius: 'var(--radius-lg)',
-              background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo))',
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              background: '#FCECED',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ffffff',
-              boxShadow: 'var(--glow-cyan)',
-              marginBottom: '14px'
+              color: '#F04B4F',
+              marginBottom: '12px'
             }}
           >
-            <Building2 size={28} />
+            <Building2 size={26} />
           </div>
-          <h1 style={{ fontSize: '26px', color: '#ffffff', margin: 0 }}>Join Homely</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '4px' }}>
+          <h1 style={{ fontSize: '24px', color: '#222222', margin: 0, fontWeight: '800' }}>Join Homely</h1>
+          <p style={{ color: '#777777', fontSize: '13px', marginTop: '4px' }}>
             Register your apartment unit to manage maintenance requests
           </p>
         </div>
 
-        <div className="glass-panel" style={{ padding: '32px' }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E7E7E9',
+            borderRadius: '12px',
+            padding: '28px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+          }}
+        >
           {error && (
             <div
               style={{
-                background: 'rgba(244, 63, 94, 0.15)',
-                border: '1px solid rgba(244, 63, 94, 0.3)',
-                borderRadius: 'var(--radius-md)',
-                padding: '12px 14px',
-                color: '#fb7185',
-                fontSize: '13px',
+                background: '#FCECED',
+                border: '1px solid #F9D0D2',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                color: '#F04B4F',
+                fontSize: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                marginBottom: '20px'
+                marginBottom: '16px'
               }}
             >
-              <AlertCircle size={16} style={{ flexShrink: 0 }} />
+              <AlertCircle size={15} style={{ flexShrink: 0 }} />
               <div>{error}</div>
             </div>
           )}
@@ -196,17 +203,17 @@ export const Register = () => {
               type="submit"
               disabled={loading}
               className="btn btn-primary"
-              style={{ width: '100%', padding: '12px', marginTop: '12px' }}
+              style={{ width: '100%', padding: '11px', marginTop: '8px', fontSize: '14px' }}
             >
-              <UserPlus size={18} />
+              <UserPlus size={16} />
               <span>{loading ? 'Creating Account...' : 'Register'}</span>
             </button>
           </form>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+        <div style={{ textAlign: 'center', marginTop: '18px', fontSize: '13px', color: '#777777' }}>
           Already have an account?{' '}
-          <Link to="/login" style={{ color: 'var(--accent-cyan)', fontWeight: '600', textDecoration: 'none' }}>
+          <Link to="/login" style={{ color: '#F04B4F', fontWeight: '600', textDecoration: 'none' }}>
             Sign In
           </Link>
         </div>

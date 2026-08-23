@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Plus, Edit2, Clock, CheckCircle2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Layers, Plus, Edit2, RefreshCw, AlertCircle } from 'lucide-react';
 import { api } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
 import { Modal } from '../../components/Modal';
@@ -77,40 +77,48 @@ export const CategorySlaManage = () => {
   return (
     <>
       <Navbar
-        title="Category-Specific SLA Configuration"
-        subtitle="Define custom SLA resolution targets per maintenance discipline (e.g., Lift: 1d, Plumbing: 2d)"
+        title="Category SLA Configuration"
+        subtitle="Define custom resolution targets per maintenance category (e.g. Lift: 1d, Plumbing: 2d)"
         extraAction={
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={handleOpenCreate} className="btn btn-primary btn-sm">
-              <Plus size={15} />
+              <Plus size={14} />
               <span>Add Category SLA</span>
             </button>
             <button onClick={fetchCategories} className="btn btn-secondary btn-sm" disabled={loading}>
-              <RefreshCw size={14} className={loading ? 'spin' : ''} />
+              <RefreshCw size={13} className={loading ? 'spin' : ''} />
             </button>
           </div>
         }
       />
 
-      <div className="page-body" style={{ maxWidth: '900px' }}>
-        <div className="glass-panel" style={{ padding: '28px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div className="page-body" style={{ maxWidth: '840px' }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E7E7E9',
+            borderRadius: '12px',
+            padding: '20px 24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h2 style={{ fontSize: '16px', color: '#ffffff', margin: 0 }}>
-                Configured Service Level Agreements ({categories.length})
+              <h2 style={{ fontSize: '15px', color: '#222222', margin: 0, fontWeight: '700' }}>
+                Service Level Agreements ({categories.length})
               </h2>
-              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
-                Updating SLA days automatically recalculates deadlines and overdue badges across all active tickets.
+              <p style={{ fontSize: '12px', color: '#777777', margin: '2px 0 0 0' }}>
+                Updating SLA days dynamically recalculates overdue status across all tickets
               </p>
             </div>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--text-muted)' }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
               Loading categories...
             </div>
           ) : categories.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#777777' }}>
               No categories configured.
             </div>
           ) : (
@@ -119,49 +127,49 @@ export const CategorySlaManage = () => {
                 <div
                   key={cat.id}
                   style={{
-                    padding: '16px 20px',
-                    borderRadius: 'var(--radius-sm)',
-                    background: 'rgba(13, 21, 39, 0.7)',
-                    border: '1px solid var(--border-subtle)',
+                    padding: '14px 18px',
+                    borderRadius: '10px',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E7E7E9',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '16px'
+                    gap: '14px'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div
                       style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: 'var(--radius-sm)',
-                        background: 'rgba(6, 182, 212, 0.15)',
+                        width: '34px',
+                        height: '34px',
+                        borderRadius: '8px',
+                        background: '#FCECED',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: 'var(--accent-cyan)'
+                        color: '#F04B4F'
                       }}
                     >
-                      <Layers size={18} />
+                      <Layers size={17} />
                     </div>
 
                     <div>
-                      <div style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#222222' }}>
                         {cat.name}
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                        Status: <strong style={{ color: cat.is_active ? 'var(--accent-emerald)' : '#64748b' }}>{cat.is_active ? 'Active' : 'Inactive'}</strong>
+                      <div style={{ fontSize: '11px', color: '#777777' }}>
+                        Status: <strong style={{ color: cat.is_active ? '#15803D' : '#777777' }}>{cat.is_active ? 'Active' : 'Inactive'}</strong>
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--accent-cyan)' }}>
+                      <div style={{ fontSize: '16px', fontWeight: '800', color: '#F04B4F' }}>
                         {cat.sla_days} {cat.sla_days === 1 ? 'Day' : 'Days'}
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                        Max Resolution Window
+                      <div style={{ fontSize: '10px', color: '#A0A0A0' }}>
+                        Resolution Target
                       </div>
                     </div>
 
@@ -169,10 +177,10 @@ export const CategorySlaManage = () => {
                       type="button"
                       onClick={() => handleOpenEdit(cat)}
                       className="btn btn-secondary btn-sm"
-                      style={{ padding: '8px 12px', display: 'flex', gap: '6px' }}
+                      style={{ padding: '6px 10px', display: 'flex', gap: '4px', fontSize: '12px' }}
                     >
-                      <Edit2 size={13} />
-                      <span>Edit SLA</span>
+                      <Edit2 size={12} />
+                      <span>Edit</span>
                     </button>
                   </div>
                 </div>
@@ -188,21 +196,21 @@ export const CategorySlaManage = () => {
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           title={editCategory ? `Edit SLA: ${editCategory.name}` : 'Create New Category SLA'}
-          maxWidth="480px"
+          maxWidth="460px"
         >
           {error && (
             <div
               style={{
-                background: 'rgba(244, 63, 94, 0.15)',
-                border: '1px solid rgba(244, 63, 94, 0.3)',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 14px',
-                color: '#fb7185',
-                fontSize: '13px',
+                background: '#FCECED',
+                border: '1px solid #F9D0D2',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                color: '#F04B4F',
+                fontSize: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                marginBottom: '16px'
+                marginBottom: '14px'
               }}
             >
               <AlertCircle size={15} />
@@ -218,7 +226,7 @@ export const CategorySlaManage = () => {
                   type="text"
                   required
                   className="input-field"
-                  placeholder="e.g. Landscaping & Garden"
+                  placeholder="e.g. Landscaping"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
@@ -226,7 +234,7 @@ export const CategorySlaManage = () => {
             )}
 
             <div className="input-group">
-              <label className="input-label">SLA Resolution Target (Days) *</label>
+              <label className="input-label">SLA Target (Days) *</label>
               <input
                 type="number"
                 min="1"
@@ -236,12 +244,12 @@ export const CategorySlaManage = () => {
                 value={slaDays}
                 onChange={(e) => setSlaDays(e.target.value)}
               />
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Complaints unresolved past this number of days will automatically be flagged as Overdue.
+              <div style={{ fontSize: '11px', color: '#777777', marginTop: '4px' }}>
+                Complaints exceeding this number of days will automatically be flagged as Overdue.
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
               <button type="button" onClick={() => setModalOpen(false)} className="btn btn-secondary">
                 Cancel
               </button>

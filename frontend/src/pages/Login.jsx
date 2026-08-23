@@ -71,52 +71,59 @@ export const Login = () => {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '24px',
-        background: 'radial-gradient(circle at 50% 30%, rgba(99, 102, 241, 0.15) 0%, rgba(7, 11, 20, 1) 70%)'
+        backgroundColor: '#F7F7F8'
       }}
     >
-      <div style={{ width: '100%', maxWidth: '460px' }}>
+      <div style={{ width: '100%', maxWidth: '440px' }}>
         {/* Logo and Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div
             style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: 'var(--radius-lg)',
-              background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo))',
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              background: '#FCECED',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ffffff',
-              boxShadow: 'var(--glow-cyan)',
-              marginBottom: '16px'
+              color: '#F04B4F',
+              marginBottom: '12px'
             }}
           >
-            <Building2 size={32} />
+            <Building2 size={26} />
           </div>
-          <h1 style={{ fontSize: '28px', color: '#ffffff', margin: 0 }}>Homely</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '6px' }}>
-            Apartment Society Maintenance & Complaint Management
+          <h1 style={{ fontSize: '24px', color: '#222222', margin: 0, fontWeight: '800' }}>Homely</h1>
+          <p style={{ color: '#777777', fontSize: '13px', marginTop: '4px' }}>
+            Apartment Society Maintenance & Operations CRM
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="glass-panel" style={{ padding: '32px' }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E7E7E9',
+            borderRadius: '12px',
+            padding: '28px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+          }}
+        >
           {error && (
             <div
               style={{
-                background: 'rgba(244, 63, 94, 0.15)',
-                border: '1px solid rgba(244, 63, 94, 0.3)',
-                borderRadius: 'var(--radius-md)',
-                padding: '12px 14px',
-                color: '#fb7185',
-                fontSize: '13px',
+                background: '#FCECED',
+                border: '1px solid #F9D0D2',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                color: '#F04B4F',
+                fontSize: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                marginBottom: '20px'
+                marginBottom: '16px'
               }}
             >
-              <AlertCircle size={16} style={{ flexShrink: 0 }} />
+              <AlertCircle size={15} style={{ flexShrink: 0 }} />
               <div>{error}</div>
             </div>
           )}
@@ -150,30 +157,31 @@ export const Login = () => {
               type="submit"
               disabled={loading}
               className="btn btn-primary"
-              style={{ width: '100%', padding: '12px', marginTop: '8px' }}
+              style={{ width: '100%', padding: '11px', marginTop: '6px', fontSize: '14px' }}
             >
-              <LogIn size={18} />
-              <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
+              <LogIn size={16} />
+              <span>{loading ? 'Signing In...' : 'Sign In'}</span>
             </button>
           </form>
 
           {/* Quick Demo Access Buttons */}
-          <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-subtle)' }}>
+          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #E7E7E9' }}>
             <div
               style={{
                 fontSize: '11px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: 'var(--text-muted)',
+                letterSpacing: '0.04em',
+                color: '#777777',
                 textAlign: 'center',
-                marginBottom: '12px',
+                marginBottom: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '6px'
+                gap: '4px',
+                fontWeight: '600'
               }}
             >
-              <Sparkles size={12} color="var(--accent-cyan)" />
+              <Sparkles size={12} color="#F04B4F" />
               <span>1-Click Instant Demo Login</span>
             </div>
 
@@ -183,9 +191,9 @@ export const Login = () => {
                 onClick={() => handleDemoLogin('resident')}
                 disabled={loading}
                 className="btn btn-secondary btn-sm"
-                style={{ padding: '8px 6px', fontSize: '11px', border: '1px solid rgba(99, 102, 241, 0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+                style={{ padding: '7px 4px', fontSize: '11px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}
               >
-                <User size={15} color="var(--accent-indigo)" />
+                <User size={14} color="#777777" />
                 <span>Resident</span>
               </button>
 
@@ -194,9 +202,9 @@ export const Login = () => {
                 onClick={() => handleDemoLogin('staff')}
                 disabled={loading}
                 className="btn btn-secondary btn-sm"
-                style={{ padding: '8px 6px', fontSize: '11px', border: '1px solid rgba(167, 139, 250, 0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+                style={{ padding: '7px 4px', fontSize: '11px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}
               >
-                <Wrench size={15} color="#a78bfa" />
+                <Wrench size={14} color="#777777" />
                 <span>Staff</span>
               </button>
 
@@ -205,9 +213,9 @@ export const Login = () => {
                 onClick={() => handleDemoLogin('admin')}
                 disabled={loading}
                 className="btn btn-secondary btn-sm"
-                style={{ padding: '8px 6px', fontSize: '11px', border: '1px solid rgba(6, 182, 212, 0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+                style={{ padding: '7px 4px', fontSize: '11px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}
               >
-                <ShieldCheck size={15} color="var(--accent-cyan)" />
+                <ShieldCheck size={14} color="#F04B4F" />
                 <span>Admin</span>
               </button>
             </div>
@@ -215,9 +223,9 @@ export const Login = () => {
         </div>
 
         {/* Footer link to Register */}
-        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+        <div style={{ textAlign: 'center', marginTop: '18px', fontSize: '13px', color: '#777777' }}>
           Don't have an account?{' '}
-          <Link to="/register" style={{ color: 'var(--accent-cyan)', fontWeight: '600', textDecoration: 'none' }}>
+          <Link to="/register" style={{ color: '#F04B4F', fontWeight: '600', textDecoration: 'none' }}>
             Register as Resident
           </Link>
         </div>

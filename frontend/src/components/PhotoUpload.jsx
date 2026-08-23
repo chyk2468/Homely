@@ -82,13 +82,13 @@ export const PhotoUpload = ({ files, setFiles, file, setFile, maxMb = 10, maxFil
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           style={{
-            border: `2px dashed ${dragOver ? 'var(--accent-cyan)' : 'var(--border-medium)'}`,
-            borderRadius: 'var(--radius-md)',
-            padding: '24px 20px',
+            border: `2px dashed ${dragOver ? '#F04B4F' : '#E7E7E9'}`,
+            borderRadius: '10px',
+            padding: '22px 18px',
             textAlign: 'center',
             cursor: 'pointer',
-            background: dragOver ? 'rgba(6, 182, 212, 0.08)' : 'rgba(13, 21, 39, 0.4)',
-            transition: 'all 0.2s ease',
+            background: dragOver ? '#FCECED' : '#FAFAFA',
+            transition: 'all 0.15s ease',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -99,25 +99,25 @@ export const PhotoUpload = ({ files, setFiles, file, setFile, maxMb = 10, maxFil
         >
           <div
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              background: 'rgba(6, 182, 212, 0.1)',
+              width: '38px',
+              height: '38px',
+              borderRadius: '8px',
+              background: '#FCECED',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'var(--accent-cyan)'
+              color: '#F04B4F'
             }}
           >
-            <UploadCloud size={22} />
+            <UploadCloud size={20} />
           </div>
 
           <div>
-            <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
+            <div style={{ fontSize: '13px', fontWeight: '600', color: '#222222' }}>
               Click to upload photo{isMulti ? 's (up to 5)' : ''} or drag & drop
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              PNG, JPG, JPEG, WEBP up to {maxMb}MB each (Optional)
+            <div style={{ fontSize: '11px', color: '#777777', marginTop: '2px' }}>
+              PNG, JPG, JPEG, WEBP up to {maxMb}MB each
             </div>
           </div>
         </div>
@@ -131,26 +131,27 @@ export const PhotoUpload = ({ files, setFiles, file, setFile, maxMb = 10, maxFil
             return (
               <div
                 key={`${f.name}-${idx}`}
-                className="glass-panel"
                 style={{
-                  padding: '10px 14px',
+                  padding: '8px 12px',
+                  background: '#FFFFFF',
+                  border: '1px solid #E7E7E9',
+                  borderRadius: '8px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: '12px',
-                  border: '1px solid var(--border-active)'
+                  gap: '10px'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
                   <img
                     src={previewUrl}
                     alt="Upload thumbnail"
                     style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '4px',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '6px',
                       objectFit: 'cover',
-                      border: '1px solid var(--border-subtle)'
+                      border: '1px solid #E7E7E9'
                     }}
                   />
                   <div style={{ minWidth: 0 }}>
@@ -158,7 +159,7 @@ export const PhotoUpload = ({ files, setFiles, file, setFile, maxMb = 10, maxFil
                       style={{
                         fontSize: '13px',
                         fontWeight: '600',
-                        color: 'var(--text-primary)',
+                        color: '#222222',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
@@ -166,8 +167,8 @@ export const PhotoUpload = ({ files, setFiles, file, setFile, maxMb = 10, maxFil
                     >
                       {f.name}
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      {(f.size / (1024 * 1024)).toFixed(2)} MB &bull; Attachment #{idx + 1}
+                    <div style={{ fontSize: '11px', color: '#777777' }}>
+                      {(f.size / (1024 * 1024)).toFixed(2)} MB &bull; Photo #{idx + 1}
                     </div>
                   </div>
                 </div>
@@ -176,7 +177,7 @@ export const PhotoUpload = ({ files, setFiles, file, setFile, maxMb = 10, maxFil
                   type="button"
                   onClick={() => handleRemove(idx)}
                   className="btn btn-secondary btn-sm"
-                  style={{ padding: '6px', color: 'var(--accent-rose)' }}
+                  style={{ padding: '5px', color: '#F04B4F' }}
                   title="Remove photo"
                 >
                   <X size={14} />
@@ -188,7 +189,7 @@ export const PhotoUpload = ({ files, setFiles, file, setFile, maxMb = 10, maxFil
       )}
 
       {error && (
-        <div style={{ color: 'var(--accent-rose)', fontSize: '12px', marginTop: '6px', fontWeight: '500' }}>
+        <div style={{ color: '#F04B4F', fontSize: '12px', marginTop: '6px', fontWeight: '500' }}>
           {error}
         </div>
       )}

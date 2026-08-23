@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Bell,
   ArrowRight,
-  Sparkles,
   Building
 } from 'lucide-react';
 import { api } from '../../api/client';
@@ -70,7 +69,7 @@ export const ResidentDashboard = () => {
         subtitle={`Welcome back, ${user?.full_name || 'Resident'} (${user?.flat_number || 'Unit'})`}
         extraAction={
           <Link to="/resident/new-complaint" className="btn btn-primary btn-sm">
-            <PlusCircle size={15} />
+            <PlusCircle size={14} />
             <span>Raise Complaint</span>
           </Link>
         }
@@ -80,47 +79,48 @@ export const ResidentDashboard = () => {
         {/* Important Announcement Banner if any */}
         {importantNotice && (
           <div
-            className="glass-panel"
             style={{
-              padding: '16px 20px',
-              marginBottom: '28px',
-              borderLeft: '4px solid var(--accent-rose)',
-              background: 'linear-gradient(90deg, rgba(244, 63, 94, 0.12), rgba(13, 21, 39, 0.6))',
+              padding: '14px 18px',
+              marginBottom: '20px',
+              borderLeft: '4px solid #F04B4F',
+              background: '#FCECED',
+              borderRadius: '10px',
+              border: '1px solid #F9D0D2',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '16px'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div
                 style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '32px',
+                  height: '32px',
                   borderRadius: '50%',
-                  background: 'rgba(244, 63, 94, 0.2)',
+                  background: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#fb7185',
+                  color: '#F04B4F',
                   flexShrink: 0
                 }}
               >
-                <Bell size={18} />
+                <Bell size={16} />
               </div>
               <div>
-                <div style={{ fontSize: '12px', fontWeight: '700', color: '#fb7185', textTransform: 'uppercase' }}>
+                <div style={{ fontSize: '11px', fontWeight: '700', color: '#F04B4F', textTransform: 'uppercase' }}>
                   Important Notice
                 </div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#222222' }}>
                   {importantNotice.title}
                 </div>
               </div>
             </div>
 
-            <Link to="/notices" className="btn btn-secondary btn-sm" style={{ flexShrink: 0 }}>
-              <span>View Notice</span>
-              <ArrowRight size={13} />
+            <Link to="/notices" className="btn btn-secondary btn-sm" style={{ flexShrink: 0, padding: '5px 10px', fontSize: '12px' }}>
+              <span>View</span>
+              <ArrowRight size={12} />
             </Link>
           </div>
         )}
@@ -129,16 +129,16 @@ export const ResidentDashboard = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '20px',
-            marginBottom: '32px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '16px',
+            marginBottom: '24px'
           }}
         >
           <StatsCard
             title="Total Complaints"
             value={total}
             icon={ListOrdered}
-            color="indigo"
+            color="coral"
             subtitle="Raised by your unit"
             onClick={() => navigate('/resident/my-complaints')}
           />
@@ -146,15 +146,15 @@ export const ResidentDashboard = () => {
             title="Open / Pending"
             value={openCount}
             icon={AlertCircle}
-            color="amber"
-            subtitle="Awaiting admin action"
+            color="coral"
+            subtitle="Awaiting action"
             onClick={() => navigate('/resident/my-complaints?status=Open')}
           />
           <StatsCard
             title="In Progress"
             value={inProgressCount}
             icon={Clock}
-            color="blue"
+            color="amber"
             subtitle="Work in progress"
             onClick={() => navigate('/resident/my-complaints?status=In+Progress')}
           />
@@ -169,72 +169,94 @@ export const ResidentDashboard = () => {
         </div>
 
         {/* Recent Complaints Section */}
-        <div className="glass-panel" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E7E7E9',
+            borderRadius: '12px',
+            padding: '20px 24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h2 style={{ fontSize: '18px', color: '#ffffff', margin: 0 }}>My Recent Complaints</h2>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
-                Track maintenance status and administrator notes in real-time
+              <h2 style={{ fontSize: '16px', color: '#222222', margin: 0, fontWeight: '700' }}>Recent Complaints</h2>
+              <p style={{ fontSize: '12px', color: '#777777', margin: '2px 0 0 0' }}>
+                Track maintenance status and progress notes in real-time
               </p>
             </div>
 
             <Link to="/resident/my-complaints" className="btn btn-secondary btn-sm">
               <span>View All</span>
-              <ArrowRight size={14} />
+              <ArrowRight size={13} />
             </Link>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+            <div style={{ textAlign: 'center', padding: '32px 0', color: '#777777', fontSize: '13px' }}>
               Loading complaints...
             </div>
           ) : complaints.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 20px' }}>
-              <Building size={36} color="var(--text-muted)" style={{ margin: '0 auto 12px' }} />
-              <h3 style={{ fontSize: '16px', color: 'var(--text-primary)', marginBottom: '6px' }}>
+            <div style={{ textAlign: 'center', padding: '36px 20px' }}>
+              <Building size={32} color="#A0A0A0" style={{ margin: '0 auto 10px' }} />
+              <h3 style={{ fontSize: '15px', color: '#222222', marginBottom: '4px' }}>
                 No Complaints Raised Yet
               </h3>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '18px' }}>
+              <p style={{ fontSize: '13px', color: '#777777', marginBottom: '16px' }}>
                 Everything in your unit is operating smoothly! Need maintenance assistance?
               </p>
               <Link to="/resident/new-complaint" className="btn btn-primary btn-sm">
-                <PlusCircle size={15} />
+                <PlusCircle size={14} />
                 <span>Raise a Complaint</span>
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {complaints.slice(0, 5).map((item) => (
                 <div
                   key={item.id}
                   onClick={() => navigate(`/resident/complaints/${item.id}`)}
-                  className="glass-panel glass-panel-interactive"
                   style={{
-                    padding: '16px 20px',
+                    padding: '12px 16px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '16px',
-                    cursor: 'pointer'
+                    gap: '12px',
+                    cursor: 'pointer',
+                    borderRadius: '8px',
+                    border: '1px solid #E7E7E9',
+                    backgroundColor: '#FFFFFF',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FAFAFA';
+                    e.currentTarget.style.borderColor = '#D5D5D8';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FFFFFF';
+                    e.currentTarget.style.borderColor = '#E7E7E9';
                   }}
                 >
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '12px', color: 'var(--accent-cyan)', fontWeight: '600' }}>
-                        #{item.id} &bull; {item.category}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
+                      <span style={{ fontSize: '12px', color: '#F04B4F', fontWeight: '700' }}>
+                        #{item.id}
+                      </span>
+                      <span style={{ fontSize: '12px', color: '#777777' }}>
+                        &bull; {item.category}
                       </span>
                       <SLACountdownBadge complaint={item} />
-                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                      <span style={{ fontSize: '11px', color: '#A0A0A0' }}>
                         &bull; {formatDate(item.created_at)}
                       </span>
                     </div>
 
-                    <div style={{ fontSize: '15px', fontWeight: '600', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#222222', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.title}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                     <PriorityBadge priority={item.priority} />
                     <StatusBadge status={item.status} isOverdue={item.is_overdue} />
                   </div>

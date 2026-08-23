@@ -10,9 +10,8 @@ export const Navbar = ({ title, subtitle, extraAction }) => {
     <header
       style={{
         padding: '16px 32px',
-        borderBottom: '1px solid var(--border-subtle)',
-        background: 'rgba(13, 21, 39, 0.75)',
-        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid #E7E7E9',
+        backgroundColor: '#FFFFFF',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -22,15 +21,15 @@ export const Navbar = ({ title, subtitle, extraAction }) => {
       }}
     >
       <div>
-        <h1 style={{ fontSize: '20px', margin: 0, color: '#ffffff' }}>{title}</h1>
+        <h1 style={{ fontSize: '20px', margin: 0, color: '#222222', fontWeight: '700' }}>{title}</h1>
         {subtitle && (
-          <p style={{ margin: '2px 0 0 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+          <p style={{ margin: '2px 0 0 0', fontSize: '13px', color: '#777777' }}>
             {subtitle}
           </p>
         )}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {extraAction}
 
         <NotificationDropdown />
@@ -39,28 +38,28 @@ export const Navbar = ({ title, subtitle, extraAction }) => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '6px 12px',
-            borderRadius: '999px',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid var(--border-subtle)',
+            gap: '6px',
+            padding: '5px 10px',
+            borderRadius: '8px',
+            background: '#F7F7F8',
+            border: '1px solid #E7E7E9',
             fontSize: '12px'
           }}
         >
           {isAdmin ? (
             <>
-              <ShieldCheck size={14} color="var(--accent-cyan)" />
-              <span style={{ color: 'var(--accent-cyan)', fontWeight: '600' }}>Admin Mode</span>
+              <ShieldCheck size={14} color="#F04B4F" />
+              <span style={{ color: '#222222', fontWeight: '600' }}>Admin Mode</span>
             </>
           ) : isStaff ? (
             <>
-              <Wrench size={14} color="#a78bfa" />
-              <span style={{ color: '#a78bfa', fontWeight: '600' }}>{user?.specialization || 'Staff'}</span>
+              <Wrench size={14} color="#F04B4F" />
+              <span style={{ color: '#222222', fontWeight: '600' }}>{user?.specialization || 'Staff'}</span>
             </>
           ) : (
             <>
-              <UserCheck size={14} color="var(--accent-indigo)" />
-              <span style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>{user?.flat_number || 'Resident'}</span>
+              <UserCheck size={14} color="#777777" />
+              <span style={{ color: '#222222', fontWeight: '500' }}>{user?.flat_number || 'Resident'}</span>
             </>
           )}
         </div>
