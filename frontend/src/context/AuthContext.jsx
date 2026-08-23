@@ -57,6 +57,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateProfile = async (profileData) => {
+    const updatedUser = await api.updateProfile(profileData);
+    setUser(updatedUser);
+    return updatedUser;
+  };
+
   const value = {
     user,
     loading,
@@ -67,6 +73,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateProfile,
     refreshUser: fetchCurrentUser
   };
 

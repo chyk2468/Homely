@@ -536,3 +536,41 @@ def test_dashboard_smart_analytics():
     assert "staff_workloads" in stats
     assert "rating_distribution" in stats
     assert "sla_compliance_rate" in stats
+
+# 16. Profile Update & Password Change
+def test_update_profile_and_password():
+    res1_token = client.post("/api/auth/login", json={"email": "testresident1@society.com", "password": "residentpass123"}).json()["access_token"]
+    headers = {"Authorization": f"Bearer {res1_token}"}
+
+    # Update personal details
+    update_res = client.put(
+        "/api/auth/profile",
+        json={"full_name": "Resident Updated", "phone_number": "+91 99999 88888", "flat_number": "C-303"},
+        headers=headers
+    )
+    assert update_res.status_code == 200
+    updated_data = update_res.json()
+    assert updated_data["full_name"] == "Resident Updated"
+    assert updated_data["phone_number"] == "+91 99999 88888"
+    assert updated_data["flat_number"] == "C-303"
+
+    # Try changing password with wrong current password -> 400
+    wrong_pw_res = client.put(
+        "/api/auth/profile",
+        json={"current_password": "wrongpassword", "new_password": "newpassword123"},
+        headers=headers
+    )
+    assert wrong_pw_res.status_code == 400
+
+    # Change password successfully
+    pw_res = client.put(
+        "/api/auth/profile",
+        json={"current_password": "residentpass123", "new_password": "newpassword123"},
+        headers=headers
+    )
+    assert pw_res.status_code == 200
+
+    # Verify login with new password
+    new_login = client.post("/api/auth/login", json={"email": "testresident1@society.com", "password": "newpassword123"})
+    assert new_login.status_code == 200
+    assert "access_token" in new_login.json()

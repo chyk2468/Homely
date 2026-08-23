@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User, UserRole
-from app.schemas.auth import UserCreate, UserLogin, UserResponse, Token
+from app.schemas.auth import UserCreate, UserLogin, UserResponse, Token, ProfileUpdate
 from app.services.auth_service import get_password_hash, verify_password, create_access_token
 from app.dependencies import get_current_user
 
@@ -63,4 +63,41 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     """Retrieve details of the currently authenticated user."""
+    return current_user
+
+@router.put("/profile", response_model=UserResponse)
+def update_profile(
+    profile_in: ProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Update profile details (name, phone, flat number) and/or change password."""
+    if profile_in.full_name is not None and profile_in.full_name.strip():
+        current_user.full_name = profile_in.full_name.strip()
+    if profile_in.phone_number is not None:
+        current_user.phone_number = profile_in.phone_number.strip() if profile_in.phone_number.strip() else None
+    if profile_in.flat_number is not None:
+        current_user.flat_number = profile_in.flat_number.strip() if profile_in.flat_number.strip() else None
+
+    # Change password if requested
+    if profile_in.new_password:
+        if not profile_in.current_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Current password is required to set a new password."
+            )
+        if not verify_password(profile_in.current_password, current_user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Current password is incorrect."
+            )
+        if len(profile_in.new_password) < 6:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password must be at least 6 characters long."
+            )
+        current_user.password_hash = get_password_hash(profile_in.new_password)
+
+    db.commit()
+    db.refresh(current_user)
     return current_user

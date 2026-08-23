@@ -31,12 +31,14 @@ export const Sidebar = ({ overdueCount = 0 }) => {
     { to: '/resident/new-complaint', label: 'Raise Complaint', icon: PlusCircle },
     { to: '/resident/my-complaints', label: 'My Complaints', icon: ListOrdered },
     { to: '/notices', label: 'Notice Board', icon: Bell },
+    { to: '/profile', label: 'My Profile', icon: User },
   ];
 
   const staffNav = [
     { to: '/staff/dashboard', label: 'Staff Dashboard', icon: LayoutDashboard },
     { to: '/staff/my-assigned', label: 'Assigned Complaints', icon: ListOrdered, badge: overdueCount > 0 ? `${overdueCount}` : null },
     { to: '/notices', label: 'Notice Board', icon: Bell },
+    { to: '/profile', label: 'My Profile', icon: User },
   ];
 
   const adminNav = [
@@ -47,6 +49,7 @@ export const Sidebar = ({ overdueCount = 0 }) => {
     { to: '/admin/categories', label: 'Category SLAs', icon: Layers },
     { to: '/admin/audit-logs', label: 'Audit Log', icon: FileText },
     { to: '/admin/settings', label: 'SLA Settings', icon: Sliders },
+    { to: '/profile', label: 'Admin Profile', icon: User },
   ];
 
   let navItems = residentNav;
@@ -160,7 +163,22 @@ export const Sidebar = ({ overdueCount = 0 }) => {
           backgroundColor: '#FFFFFF'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', padding: '0 4px' }}>
+        <div
+          onClick={() => navigate('/profile')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginBottom: '10px',
+            padding: '6px 8px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            transition: 'background 0.15s ease'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F7F7F8'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+          title="Click to view and edit profile"
+        >
           <div
             style={{
               width: '34px',

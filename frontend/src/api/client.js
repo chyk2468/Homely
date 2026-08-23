@@ -107,6 +107,13 @@ class ApiClient {
     return this.request('/auth/me');
   }
 
+  async updateProfile(profileData) {
+    return this.request('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData)
+    });
+  }
+
   // Complaints
   async createComplaint(formData) {
     return this.request('/complaints', {

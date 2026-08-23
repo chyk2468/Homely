@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, UserCheck, Wrench } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { NotificationDropdown } from './NotificationDropdown';
 
 export const Navbar = ({ title, subtitle, extraAction }) => {
   const { user, isAdmin, isStaff } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header
@@ -35,6 +37,7 @@ export const Navbar = ({ title, subtitle, extraAction }) => {
         <NotificationDropdown />
 
         <div
+          onClick={() => navigate('/profile')}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -43,8 +46,13 @@ export const Navbar = ({ title, subtitle, extraAction }) => {
             borderRadius: '8px',
             background: '#F7F7F8',
             border: '1px solid #E7E7E9',
-            fontSize: '12px'
+            fontSize: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FCECED'; e.currentTarget.style.borderColor = '#F9D0D2'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F7F7F8'; e.currentTarget.style.borderColor = '#E7E7E9'; }}
+          title="Account Profile & Settings"
         >
           {isAdmin ? (
             <>

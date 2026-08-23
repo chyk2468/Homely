@@ -7,6 +7,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { NoticeBoard } from './pages/NoticeBoard';
+import { Profile } from './pages/Profile';
 
 // Resident Pages
 import { ResidentDashboard } from './pages/resident/Dashboard';
@@ -76,6 +77,7 @@ export default function App() {
           {/* Shared Authenticated Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/notices" element={<NoticeBoard />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
 
           {/* Catch-all */}
