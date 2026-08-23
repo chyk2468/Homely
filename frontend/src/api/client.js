@@ -277,7 +277,7 @@ class ApiClient {
     return this.request('/admin/analytics/recurring-issues');
   }
 
-  getComplaintsCsvDownloadUrl(params = {}) {
+  async downloadComplaintsCsv(params = {}) {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, val]) => {
       if (val !== undefined && val !== null && val !== '') {
@@ -285,7 +285,26 @@ class ApiClient {
       }
     });
     const queryString = query.toString() ? `?${query.toString()}` : '';
-    return `${BASE_URL}/admin/reports/complaints/csv${queryString}`;
+    const headers = {};
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+    const res = await fetch(`${BASE_URL}/admin/reports/complaints/csv${queryString}`, {
+      headers
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to download CSV' }));
+      throw new Error(err.detail || 'Failed to download CSV');
+    }
+    const blob = await res.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `complaints_report_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
   }
 
   // In-App Notifications

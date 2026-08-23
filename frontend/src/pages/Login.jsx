@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Building2, LogIn, ShieldCheck, User, Wrench, Sparkles, AlertCircle } from 'lucide-react';
+import { Building2, LogIn, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const Login = () => {
@@ -31,33 +31,6 @@ export const Login = () => {
       handleRedirect(user.role);
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async (roleType) => {
-    setError('');
-    setLoading(true);
-    let demoEmail = 'resident@society.com';
-    let demoPass = 'resident123';
-
-    if (roleType === 'admin') {
-      demoEmail = 'admin@society.com';
-      demoPass = 'admin123';
-    } else if (roleType === 'staff') {
-      demoEmail = 'plumber@society.com';
-      demoPass = 'staff123';
-    }
-
-    setEmail(demoEmail);
-    setPassword(demoPass);
-
-    try {
-      const user = await login(demoEmail, demoPass);
-      handleRedirect(user.role);
-    } catch (err) {
-      setError(err.message || 'Demo login failed.');
     } finally {
       setLoading(false);
     }
@@ -105,7 +78,7 @@ export const Login = () => {
             border: '1px solid #E7E7E9',
             borderRadius: '12px',
             padding: '28px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
           }}
         >
           {error && (
@@ -163,63 +136,6 @@ export const Login = () => {
               <span>{loading ? 'Signing In...' : 'Sign In'}</span>
             </button>
           </form>
-
-          {/* Quick Demo Access Buttons */}
-          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #E7E7E9' }}>
-            <div
-              style={{
-                fontSize: '11px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                color: '#777777',
-                textAlign: 'center',
-                marginBottom: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                fontWeight: '600'
-              }}
-            >
-              <Sparkles size={12} color="#F04B4F" />
-              <span>1-Click Instant Demo Login</span>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('resident')}
-                disabled={loading}
-                className="btn btn-secondary btn-sm"
-                style={{ padding: '7px 4px', fontSize: '11px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}
-              >
-                <User size={14} color="#777777" />
-                <span>Resident</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('staff')}
-                disabled={loading}
-                className="btn btn-secondary btn-sm"
-                style={{ padding: '7px 4px', fontSize: '11px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}
-              >
-                <Wrench size={14} color="#777777" />
-                <span>Staff</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('admin')}
-                disabled={loading}
-                className="btn btn-secondary btn-sm"
-                style={{ padding: '7px 4px', fontSize: '11px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}
-              >
-                <ShieldCheck size={14} color="#F04B4F" />
-                <span>Admin</span>
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Footer link to Register */}

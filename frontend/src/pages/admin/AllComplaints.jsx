@@ -126,13 +126,16 @@ export const AllComplaints = () => {
     }
   };
 
-  const handleExportCsv = () => {
-    const params = {};
-    if (categoryFilter) params.category = categoryFilter;
-    if (statusFilter) params.status = statusFilter;
-    if (isOverdueFilter) params.is_overdue = isOverdueFilter === 'true';
-    const url = api.getComplaintsCsvDownloadUrl(params);
-    window.open(url, '_blank');
+  const handleExportCsv = async () => {
+    try {
+      const params = {};
+      if (categoryFilter) params.category = categoryFilter;
+      if (statusFilter) params.status = statusFilter;
+      if (isOverdueFilter) params.is_overdue = isOverdueFilter === 'true';
+      await api.downloadComplaintsCsv(params);
+    } catch (err) {
+      alert(err.message || 'Failed to export CSV report.');
+    }
   };
 
   const formatDate = (isoString) => {
