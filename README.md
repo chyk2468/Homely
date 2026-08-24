@@ -2,10 +2,13 @@
 
 > A modern, full-stack apartment society maintenance and complaint management platform designed for residents, maintenance staff technicians, and society administrators.
 
+[![Live Demo](https://img.shields.io/badge/Live_Deployment-frontend--tau--eight--14.vercel.app-2ea44f?style=for-the-badge&logo=vercel)](https://frontend-tau-eight-14.vercel.app/login)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React_19_+_Vite-61DAFB?logo=react&logoColor=black)](https://vitejs.dev/)
 [![SQLite/SQLAlchemy](https://img.shields.io/badge/Database-SQLAlchemy_%2B_SQLite-red)](https://www.sqlalchemy.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+🌐 **Live Deployed Application:** [https://frontend-tau-eight-14.vercel.app/login](https://frontend-tau-eight-14.vercel.app/login)
 
 ---
 
@@ -25,6 +28,10 @@ Apartment societies process continuous streams of resident maintenance complaint
 ---
 
 ## 🔑 2. Demo Accounts
+
+> 🚀 **Live Deployed App:** [https://frontend-tau-eight-14.vercel.app/login](https://frontend-tau-eight-14.vercel.app/login)
+>
+> You can try the live platform directly using any of the pre-seeded demo accounts below:
 
 | Role | Email | Password | Access / Capabilities |
 |---|---|---|---|
@@ -391,6 +398,9 @@ pytest tests/ -v
 ---
 
 ## ☁️ 10. Production Deployment (Vercel & Render)
+
+### 🚀 Live Deployment
+- **Frontend App (Vercel):** [https://frontend-tau-eight-14.vercel.app/login](https://frontend-tau-eight-14.vercel.app/login)
 
 ### Frontend (Vercel)
 1. Import repository `https://github.com/chyk2468/Homely.git` into [Vercel](https://vercel.com).
