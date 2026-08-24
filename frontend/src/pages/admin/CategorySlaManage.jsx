@@ -1,30 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Plus, Edit2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Layers, Plus, Edit2, RefreshCw, AlertCircle, Check } from 'lucide-react';
 import { api } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
 import { Modal } from '../../components/Modal';
+import { SkeletonListRow } from '../../components/Skeleton';
+import { useToast } from '../../context/ToastContext';
 
 export const CategorySlaManage = () => {
+  const toast = useToast();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editCategory, setEditCategory] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState('');
 
   // Form states
   const [name, setName] = useState('');
   const [slaDays, setSlaDays] = useState(3);
 
-  const fetchCategories = async () => {
-    setLoading(true);
+  const fetchCategories = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    else setLoading(true);
+
     try {
       const data = await api.getCategorySlas();
       setCategories(data);
+      if (isManual) toast.success('SLAs updated', 'Latest category SLAs loaded.');
     } catch (err) {
       console.error('Failed to load category SLAs:', err);
+      if (isManual) toast.error('Refresh failed', 'Could not retrieve category SLAs.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -37,6 +47,7 @@ export const CategorySlaManage = () => {
     setName('');
     setSlaDays(3);
     setError('');
+    setSaveSuccess(false);
     setModalOpen(true);
   };
 
@@ -45,6 +56,7 @@ export const CategorySlaManage = () => {
     setName(cat.name);
     setSlaDays(cat.sla_days);
     setError('');
+    setSaveSuccess(false);
     setModalOpen(true);
   };
 
@@ -58,19 +70,27 @@ export const CategorySlaManage = () => {
         await api.updateCategorySla(editCategory.id, {
           sla_days: parseInt(slaDays, 10)
         });
+        toast.success('SLA updated', `${editCategory.name} SLA set to ${slaDays} days.`);
       } else {
         await api.createCategorySla({
           name: name.trim(),
           sla_days: parseInt(slaDays, 10),
           is_active: true
         });
+        toast.success('Category created', `${name.trim()} added with ${slaDays} days SLA.`);
       }
-      setModalOpen(false);
-      fetchCategories();
-    } catch (err) {
-      setError(err.message || 'Failed to save category SLA.');
-    } finally {
       setSaving(false);
+      setSaveSuccess(true);
+
+      setTimeout(() => {
+        setModalOpen(false);
+        setSaveSuccess(false);
+        fetchCategories();
+      }, 700);
+    } catch (err) {
+      setSaving(false);
+      setError(err.message || 'Failed to save category SLA.');
+      toast.error('Save failed', err.message || 'Failed to save category SLA.');
     }
   };
 
@@ -85,8 +105,12 @@ export const CategorySlaManage = () => {
               <Plus size={14} />
               <span>Add Category SLA</span>
             </button>
-            <button onClick={fetchCategories} className="btn btn-secondary btn-sm" disabled={loading}>
-              <RefreshCw size={13} className={loading ? 'spin' : ''} />
+            <button
+              onClick={() => fetchCategories(true)}
+              className="btn btn-secondary btn-sm"
+              disabled={loading || refreshing}
+            >
+              <RefreshCw size={13} className={refreshing ? 'spin-once' : ''} />
             </button>
           </div>
         }
@@ -94,6 +118,7 @@ export const CategorySlaManage = () => {
 
       <div className="page-body" style={{ maxWidth: '840px' }}>
         <div
+          className="stagger-1"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -114,8 +139,9 @@ export const CategorySlaManage = () => {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
-              Loading categories...
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <SkeletonListRow />
+              <SkeletonListRow />
             </div>
           ) : categories.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#777777' }}>
@@ -123,7 +149,7 @@ export const CategorySlaManage = () => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {categories.map((cat) => (
+              {categories.map((cat, idx) => (
                 <div
                   key={cat.id}
                   style={{
@@ -134,7 +160,17 @@ export const CategorySlaManage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '14px'
+                    gap: '14px',
+                    transition: 'transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s',
+                    animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.04}s both`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1.5px)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.04)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -210,7 +246,8 @@ export const CategorySlaManage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                marginBottom: '14px'
+                marginBottom: '14px',
+                animation: 'itemSlideUp 0.25s forwards'
               }}
             >
               <AlertCircle size={15} />
@@ -253,8 +290,17 @@ export const CategorySlaManage = () => {
               <button type="button" onClick={() => setModalOpen(false)} className="btn btn-secondary">
                 Cancel
               </button>
-              <button type="submit" disabled={saving} className="btn btn-primary">
-                <span>{saving ? 'Saving...' : 'Save Configuration'}</span>
+              <button
+                type="submit"
+                disabled={saving || saveSuccess}
+                className={`btn ${saveSuccess ? 'btn-success' : 'btn-primary'}`}
+              >
+                {saving ? (
+                  <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                ) : saveSuccess ? (
+                  <Check size={14} className="btn-checkmark-icon" />
+                ) : null}
+                <span>{saving ? 'Saving...' : saveSuccess ? 'Saved!' : 'Save Configuration'}</span>
               </button>
             </div>
           </form>

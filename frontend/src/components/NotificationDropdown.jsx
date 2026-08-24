@@ -7,12 +7,20 @@ export const NotificationDropdown = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [bellWiggle, setBellWiggle] = useState(false);
+  const prevCountRef = useRef(0);
   const dropdownRef = useRef(null);
 
   const fetchUnreadCount = async () => {
     try {
       const data = await api.getUnreadNotificationCount();
-      setUnreadCount(data.unread_count || 0);
+      const count = data.unread_count || 0;
+      if (count > prevCountRef.current && count > 0) {
+        setBellWiggle(true);
+        setTimeout(() => setBellWiggle(false), 700);
+      }
+      prevCountRef.current = count;
+      setUnreadCount(count);
     } catch {
       // Ignore background fetch failure
     }
@@ -121,10 +129,12 @@ export const NotificationDropdown = () => {
           color: '#222222'
         }}
         title="Notifications"
+        aria-label="Toggle notifications"
       >
-        <Bell size={17} />
+        <Bell size={17} className={bellWiggle ? 'bell-wiggle' : ''} />
         {unreadCount > 0 && (
           <span
+            className="badge-pop"
             style={{
               position: 'absolute',
               top: '-3px',
@@ -163,7 +173,9 @@ export const NotificationDropdown = () => {
             overflow: 'hidden',
             background: '#FFFFFF',
             borderRadius: '12px',
-            border: '1px solid #E7E7E9'
+            border: '1px solid #E7E7E9',
+            animation: 'modalScaleIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+            transformOrigin: 'top right'
           }}
         >
           {/* Header */}
@@ -199,7 +211,8 @@ export const NotificationDropdown = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '3px',
-                  fontWeight: '600'
+                  fontWeight: '600',
+                  transition: 'opacity 0.15s'
                 }}
               >
                 <CheckCheck size={13} />
@@ -221,7 +234,7 @@ export const NotificationDropdown = () => {
                 <div style={{ fontSize: '11px', marginTop: '2px', color: '#A0A0A0' }}>No new notifications.</div>
               </div>
             ) : (
-              notifications.map((notif) => (
+              notifications.map((notif, idx) => (
                 <div
                   key={notif.id}
                   onClick={() => handleMarkAsRead(notif)}
@@ -232,7 +245,14 @@ export const NotificationDropdown = () => {
                     cursor: 'pointer',
                     background: notif.is_read ? '#FFFFFF' : '#FCECED',
                     borderLeft: notif.is_read ? '2px solid transparent' : '2px solid #F04B4F',
-                    transition: 'background 0.15s'
+                    transition: 'background 0.15s, transform 0.15s',
+                    animation: `itemSlideRight 0.3s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.03}s both`
+                  }}
+                  onMouseEnter={(e) => {
+                    if (notif.is_read) e.currentTarget.style.background = '#F7F7F8';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (notif.is_read) e.currentTarget.style.background = '#FFFFFF';
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>

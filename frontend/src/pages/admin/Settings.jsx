@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, AlertCircle, Save, Clock } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Save, Clock, Check } from 'lucide-react';
 import { api } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
+import { useToast } from '../../context/ToastContext';
 
 export const AdminSettings = () => {
+  const toast = useToast();
   const [thresholdDays, setThresholdDays] = useState(7);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState('');
 
   const fetchSettings = async () => {
@@ -29,16 +31,18 @@ export const AdminSettings = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     setSaving(true);
 
     try {
       const res = await api.updateOverdueThreshold(thresholdDays);
-      setSuccess(`Overdue threshold updated to ${res.overdue_threshold_days} days! Active complaints have been recalculated.`);
-    } catch (err) {
-      setError(err.message || 'Failed to update threshold.');
-    } finally {
       setSaving(false);
+      setSaveSuccess(true);
+      toast.success('Settings updated', `Threshold set to ${res.overdue_threshold_days} days. Recalculated active complaints.`);
+      setTimeout(() => setSaveSuccess(false), 2000);
+    } catch (err) {
+      setSaving(false);
+      setError(err.message || 'Failed to update threshold.');
+      toast.error('Update failed', err.message || 'Failed to update threshold.');
     }
   };
 
@@ -50,26 +54,6 @@ export const AdminSettings = () => {
       />
 
       <div className="page-body" style={{ maxWidth: '760px' }}>
-        {success && (
-          <div
-            style={{
-              background: '#EAF7F0',
-              border: '1px solid #C4EDD6',
-              borderRadius: '8px',
-              padding: '10px 14px',
-              color: '#15803D',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '16px'
-            }}
-          >
-            <CheckCircle2 size={16} />
-            <div>{success}</div>
-          </div>
-        )}
-
         {error && (
           <div
             style={{
@@ -82,7 +66,8 @@ export const AdminSettings = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              marginBottom: '16px'
+              marginBottom: '16px',
+              animation: 'itemSlideUp 0.25s forwards'
             }}
           >
             <AlertCircle size={16} />
@@ -92,6 +77,7 @@ export const AdminSettings = () => {
 
         {/* Configuration Card */}
         <div
+          className="stagger-1"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -171,12 +157,18 @@ export const AdminSettings = () => {
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
               <button
                 type="submit"
-                disabled={saving || loading}
-                className="btn btn-primary"
+                disabled={saving || loading || saveSuccess}
+                className={`btn ${saveSuccess ? 'btn-success' : 'btn-primary'}`}
                 style={{ padding: '10px 20px' }}
               >
-                <Save size={15} />
-                <span>{saving ? 'Saving...' : 'Save & Recalculate'}</span>
+                {saving ? (
+                  <span className="btn-spinner" style={{ width: '14px', height: '14px' }} />
+                ) : saveSuccess ? (
+                  <Check size={15} className="btn-checkmark-icon" />
+                ) : (
+                  <Save size={15} />
+                )}
+                <span>{saving ? 'Saving...' : saveSuccess ? 'Saved & Recalculated!' : 'Save & Recalculate'}</span>
               </button>
             </div>
           </form>

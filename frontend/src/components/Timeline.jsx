@@ -30,8 +30,9 @@ export const Timeline = ({ history = [] }) => {
 
   return (
     <div style={{ position: 'relative', paddingLeft: '20px', margin: '16px 0' }}>
-      {/* Connecting Line */}
+      {/* Connecting Line with Drawing Animation */}
       <div
+        className="timeline-line"
         style={{
           position: 'absolute',
           top: '10px',
@@ -49,9 +50,16 @@ export const Timeline = ({ history = [] }) => {
           const isLatest = index === sorted.length - 1;
 
           return (
-            <div key={item.id || index} style={{ position: 'relative' }}>
-              {/* Node Dot */}
+            <div
+              key={item.id || index}
+              style={{
+                position: 'relative',
+                animation: `itemSlideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) ${index * 0.06}s both`
+              }}
+            >
+              {/* Node Dot with Scale Animation */}
               <div
+                className="timeline-node"
                 style={{
                   position: 'absolute',
                   left: '-20px',
@@ -61,7 +69,9 @@ export const Timeline = ({ history = [] }) => {
                   borderRadius: '50%',
                   backgroundColor: isLatest ? '#F04B4F' : '#FFFFFF',
                   border: `3px solid ${isLatest ? '#F04B4F' : '#D5D5D8'}`,
-                  zIndex: 2
+                  zIndex: 2,
+                  boxShadow: isLatest ? '0 0 10px rgba(240, 75, 79, 0.3)' : 'none',
+                  transition: 'background-color 0.2s, border-color 0.2s'
                 }}
               />
 
@@ -72,7 +82,8 @@ export const Timeline = ({ history = [] }) => {
                   backgroundColor: isLatest ? '#FAFAFA' : '#FFFFFF',
                   border: isLatest ? '1px solid #F9D0D2' : '1px solid #E7E7E9',
                   borderRadius: '10px',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)'
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)',
+                  transition: 'border-color 0.2s ease, transform 0.2s ease'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>

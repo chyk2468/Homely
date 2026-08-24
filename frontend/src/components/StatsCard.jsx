@@ -1,6 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { AnimatedNumber } from './AnimatedNumber';
 
-export const StatsCard = ({ title, value, icon: Icon, color = 'coral', subtitle, alert = false, onClick }) => {
+export const StatsCard = ({
+  title,
+  value,
+  icon: Icon,
+  color = 'coral',
+  subtitle,
+  alert = false,
+  onClick,
+  prefix = '',
+  suffix = '',
+  decimals = 0,
+  staggerClass = ''
+}) => {
+  const [iconPulsing, setIconPulsing] = useState(false);
+
   const colorMap = {
     coral: {
       bg: '#FCECED',
@@ -30,9 +45,14 @@ export const StatsCard = ({ title, value, icon: Icon, color = 'coral', subtitle,
 
   const selectedColor = colorMap[color] || colorMap.coral;
 
+  const handleAnimationComplete = () => {
+    setIconPulsing(true);
+    setTimeout(() => setIconPulsing(false), 500);
+  };
+
   return (
     <div
-      className={`glass-panel ${onClick ? 'glass-panel-interactive' : ''}`}
+      className={`glass-panel ${onClick ? 'glass-panel-interactive' : ''} ${alert ? 'overdue-border-pulse' : ''} ${staggerClass}`}
       onClick={onClick}
       style={{
         padding: '20px 22px',
@@ -46,6 +66,7 @@ export const StatsCard = ({ title, value, icon: Icon, color = 'coral', subtitle,
     >
       {alert && (
         <div
+          className="overdue-pulse"
           style={{
             position: 'absolute',
             top: 0,
@@ -63,7 +84,17 @@ export const StatsCard = ({ title, value, icon: Icon, color = 'coral', subtitle,
             {title}
           </div>
           <div style={{ fontSize: '28px', fontWeight: '800', fontFamily: 'var(--font-display)', color: '#222222', marginTop: '4px', lineHeight: 1.1 }}>
-            {value}
+            {typeof value === 'number' || (!isNaN(parseFloat(value)) && isFinite(value)) ? (
+              <AnimatedNumber
+                value={value}
+                prefix={prefix}
+                suffix={suffix}
+                decimals={decimals}
+                onComplete={handleAnimationComplete}
+              />
+            ) : (
+              `${prefix}${value}${suffix}`
+            )}
           </div>
           {subtitle && (
             <div style={{ fontSize: '12px', color: '#777777', marginTop: '4px' }}>
@@ -74,6 +105,7 @@ export const StatsCard = ({ title, value, icon: Icon, color = 'coral', subtitle,
 
         {Icon && (
           <div
+            className={iconPulsing ? 'kpi-icon-pulse' : ''}
             style={{
               width: '42px',
               height: '42px',
@@ -83,7 +115,8 @@ export const StatsCard = ({ title, value, icon: Icon, color = 'coral', subtitle,
               alignItems: 'center',
               justifyContent: 'center',
               color: selectedColor.text,
-              flexShrink: 0
+              flexShrink: 0,
+              transition: 'transform 0.2s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
           >
             <Icon size={20} />

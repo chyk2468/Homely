@@ -20,21 +20,33 @@ import { Navbar } from '../../components/Navbar';
 import { StatsCard } from '../../components/StatsCard';
 import { StatusBadge } from '../../components/StatusBadge';
 import { SLACountdownBadge } from '../../components/SLACountdownBadge';
+import { AnimatedNumber } from '../../components/AnimatedNumber';
+import { SkeletonStatsCard, SkeletonListRow } from '../../components/Skeleton';
+import { useToast } from '../../context/ToastContext';
 
 export const AdminDashboard = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchStats = async () => {
-    setLoading(true);
+  const fetchStats = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    else setLoading(true);
+
     try {
       const data = await api.getDashboardStats();
       setStats(data);
+      if (isManual) {
+        toast.success('Dashboard updated', 'Live metrics refreshed successfully.');
+      }
     } catch (err) {
       console.error('Failed to load admin stats:', err);
+      if (isManual) toast.error('Refresh failed', 'Could not retrieve latest stats.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -59,9 +71,13 @@ export const AdminDashboard = () => {
         title="Admin Dashboard & Smart Analytics"
         subtitle="Live society maintenance health, technician workloads, SLA compliance, and recurring patterns"
         extraAction={
-          <button onClick={fetchStats} className="btn btn-secondary btn-sm" disabled={loading}>
-            <RefreshCw size={13} className={loading ? 'spin' : ''} />
-            <span>Refresh</span>
+          <button
+            onClick={() => fetchStats(true)}
+            className="btn btn-secondary btn-sm"
+            disabled={loading || refreshing}
+          >
+            <RefreshCw size={13} className={refreshing ? 'spin-once' : ''} />
+            <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
         }
       />
@@ -70,6 +86,7 @@ export const AdminDashboard = () => {
         {/* Recurring Issues Banner if detected */}
         {stats?.recurring_issues && stats.recurring_issues.length > 0 && (
           <div
+            className="stagger-1"
             style={{
               padding: '14px 18px',
               marginBottom: '20px',
@@ -81,7 +98,8 @@ export const AdminDashboard = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '14px',
-              flexWrap: 'wrap'
+              flexWrap: 'wrap',
+              boxShadow: '0 2px 8px rgba(229, 168, 59, 0.08)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -104,47 +122,67 @@ export const AdminDashboard = () => {
         )}
 
         {/* 4 Primary KPI Cards */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px',
-            marginBottom: '20px'
-          }}
-        >
-          <StatsCard
-            title="Total Complaints"
-            value={stats?.total_complaints ?? 0}
-            icon={ListOrdered}
-            color="coral"
-            subtitle="All logged records"
-            onClick={() => navigate('/admin/complaints')}
-          />
-          <StatsCard
-            title="Open Tickets"
-            value={stats?.open_complaints ?? 0}
-            icon={AlertCircle}
-            color="coral"
-            subtitle="Awaiting action"
-            onClick={() => navigate('/admin/complaints?status=Open')}
-          />
-          <StatsCard
-            title="In Progress"
-            value={stats?.in_progress_complaints ?? 0}
-            icon={Clock}
-            color="amber"
-            subtitle="Under active work"
-            onClick={() => navigate('/admin/complaints?status=In+Progress')}
-          />
-          <StatsCard
-            title="Resolved"
-            value={stats?.resolved_complaints ?? 0}
-            icon={CheckCircle2}
-            color="emerald"
-            subtitle="Completed tickets"
-            onClick={() => navigate('/admin/complaints?status=Resolved')}
-          />
-        </div>
+        {loading && !stats ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px',
+              marginBottom: '20px'
+            }}
+          >
+            <SkeletonStatsCard />
+            <SkeletonStatsCard />
+            <SkeletonStatsCard />
+            <SkeletonStatsCard />
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px',
+              marginBottom: '20px'
+            }}
+          >
+            <StatsCard
+              title="Total Complaints"
+              value={stats?.total_complaints ?? 0}
+              icon={ListOrdered}
+              color="coral"
+              subtitle="All logged records"
+              staggerClass="stagger-1"
+              onClick={() => navigate('/admin/complaints')}
+            />
+            <StatsCard
+              title="Open Tickets"
+              value={stats?.open_complaints ?? 0}
+              icon={AlertCircle}
+              color="coral"
+              subtitle="Awaiting action"
+              staggerClass="stagger-2"
+              onClick={() => navigate('/admin/complaints?status=Open')}
+            />
+            <StatsCard
+              title="In Progress"
+              value={stats?.in_progress_complaints ?? 0}
+              icon={Clock}
+              color="amber"
+              subtitle="Under active work"
+              staggerClass="stagger-3"
+              onClick={() => navigate('/admin/complaints?status=In+Progress')}
+            />
+            <StatsCard
+              title="Resolved"
+              value={stats?.resolved_complaints ?? 0}
+              icon={CheckCircle2}
+              color="emerald"
+              subtitle="Completed tickets"
+              staggerClass="stagger-4"
+              onClick={() => navigate('/admin/complaints?status=Resolved')}
+            />
+          </div>
+        )}
 
         {/* 4 Smart Analytics Metrics */}
         <div
@@ -156,13 +194,15 @@ export const AdminDashboard = () => {
           }}
         >
           <div
+            className="stagger-2 interactive-card"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
               borderRadius: '12px',
               padding: '16px 20px',
               borderTop: '3px solid #F04B4F',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+              transition: 'transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -170,7 +210,7 @@ export const AdminDashboard = () => {
               <Timer size={16} color="#F04B4F" />
             </div>
             <div style={{ fontSize: '22px', fontWeight: '800', color: '#222222' }}>
-              {stats?.avg_resolution_hours ?? 0} hrs
+              <AnimatedNumber value={stats?.avg_resolution_hours ?? 0} suffix=" hrs" />
             </div>
             <div style={{ fontSize: '11px', color: '#777777', marginTop: '2px' }}>
               Submission to closure
@@ -178,13 +218,15 @@ export const AdminDashboard = () => {
           </div>
 
           <div
+            className="stagger-3 interactive-card"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
               borderRadius: '12px',
               padding: '16px 20px',
               borderTop: '3px solid #46B878',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+              transition: 'transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -192,7 +234,7 @@ export const AdminDashboard = () => {
               <TrendingUp size={16} color="#46B878" />
             </div>
             <div style={{ fontSize: '22px', fontWeight: '800', color: '#222222' }}>
-              {stats?.resolution_rate ?? 0}%
+              <AnimatedNumber value={stats?.resolution_rate ?? 0} suffix="%" />
             </div>
             <div style={{ fontSize: '11px', color: '#777777', marginTop: '2px' }}>
               Resolved vs total
@@ -200,21 +242,23 @@ export const AdminDashboard = () => {
           </div>
 
           <div
+            className={`stagger-4 interactive-card ${(stats?.overdue_complaints ?? 0) > 0 ? 'overdue-border-pulse' : ''}`}
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
               borderRadius: '12px',
               padding: '16px 20px',
               borderTop: '3px solid #F04B4F',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+              transition: 'transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
               <span style={{ fontSize: '11px', color: '#777777', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.04em' }}>Overdue Rate</span>
-              <Flame size={16} color="#F04B4F" />
+              <Flame size={16} color="#F04B4F" className={(stats?.overdue_complaints ?? 0) > 0 ? 'overdue-pulse' : ''} />
             </div>
             <div style={{ fontSize: '22px', fontWeight: '800', color: (stats?.overdue_complaints ?? 0) > 0 ? '#F04B4F' : '#222222' }}>
-              {stats?.overdue_percentage ?? 0}%
+              <AnimatedNumber value={stats?.overdue_percentage ?? 0} suffix="%" />
             </div>
             <div style={{ fontSize: '11px', color: '#777777', marginTop: '2px' }}>
               {stats?.overdue_complaints ?? 0} overdue ticket{(stats?.overdue_complaints ?? 0) === 1 ? '' : 's'}
@@ -222,13 +266,15 @@ export const AdminDashboard = () => {
           </div>
 
           <div
+            className="stagger-5 interactive-card"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
               borderRadius: '12px',
               padding: '16px 20px',
               borderTop: '3px solid #E5A83B',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+              transition: 'transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -236,7 +282,11 @@ export const AdminDashboard = () => {
               <Star size={16} color="#E5A83B" fill="#E5A83B" />
             </div>
             <div style={{ fontSize: '22px', fontWeight: '800', color: '#222222' }}>
-              {stats?.avg_satisfaction_rating ? `${stats.avg_satisfaction_rating} / 5.0` : 'N/A'}
+              {stats?.avg_satisfaction_rating ? (
+                <AnimatedNumber value={stats.avg_satisfaction_rating} decimals={1} suffix=" / 5.0" />
+              ) : (
+                'N/A'
+              )}
             </div>
             <div style={{ fontSize: '11px', color: '#777777', marginTop: '2px' }}>
               Resident feedback ratings
@@ -248,6 +298,7 @@ export const AdminDashboard = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px', marginBottom: '24px' }}>
           {/* Overdue Queue */}
           <div
+            className="stagger-5"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
@@ -258,7 +309,7 @@ export const AdminDashboard = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Flame size={16} color="#F04B4F" />
+                <Flame size={16} color="#F04B4F" className={(stats?.overdue_list?.length || 0) > 0 ? 'overdue-pulse' : ''} />
                 <h3 style={{ fontSize: '15px', color: '#222222', margin: 0, fontWeight: '700' }}>
                   Critical Overdue Queue ({stats?.overdue_list?.length || 0})
                 </h3>
@@ -270,7 +321,10 @@ export const AdminDashboard = () => {
             </div>
 
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '24px 0', color: '#777777', fontSize: '12px' }}>Loading...</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <SkeletonListRow />
+                <SkeletonListRow />
+              </div>
             ) : !stats?.overdue_list || stats.overdue_list.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '28px 16px', color: '#777777' }}>
                 <CheckCircle2 size={28} color="#46B878" style={{ margin: '0 auto 6px' }} />
@@ -279,7 +333,7 @@ export const AdminDashboard = () => {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {stats.overdue_list.slice(0, 5).map((item) => (
+                {stats.overdue_list.slice(0, 5).map((item, idx) => (
                   <div
                     key={item.id}
                     onClick={() => navigate('/admin/complaints')}
@@ -292,7 +346,17 @@ export const AdminDashboard = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      gap: '10px'
+                      gap: '10px',
+                      transition: 'transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s',
+                      animation: `itemSlideRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.05}s both`
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1.5px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(240, 75, 79, 0.12)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'none';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   >
                     <div style={{ minWidth: 0 }}>
@@ -315,6 +379,7 @@ export const AdminDashboard = () => {
 
           {/* Staff Workloads */}
           <div
+            className="stagger-6"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
@@ -335,14 +400,17 @@ export const AdminDashboard = () => {
             </div>
 
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '24px 0', color: '#777777', fontSize: '12px' }}>Loading...</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <SkeletonListRow />
+                <SkeletonListRow />
+              </div>
             ) : !stats?.staff_workloads || stats.staff_workloads.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '28px 16px', color: '#777777', fontSize: '12px' }}>
                 No maintenance staff configured.
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {stats.staff_workloads.map((st) => (
+                {stats.staff_workloads.map((st, idx) => (
                   <div
                     key={st.staff_id}
                     style={{
@@ -353,7 +421,17 @@ export const AdminDashboard = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      gap: '10px'
+                      gap: '10px',
+                      transition: 'border-color 0.15s, transform 0.15s',
+                      animation: `itemSlideRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.04}s both`
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#D5D5D8';
+                      e.currentTarget.style.transform = 'translateX(2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#E7E7E9';
+                      e.currentTarget.style.transform = 'none';
                     }}
                   >
                     <div>
@@ -367,10 +445,10 @@ export const AdminDashboard = () => {
 
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '12px', fontWeight: '700', color: st.active_tickets > 0 ? '#E5A83B' : '#46B878' }}>
-                        {st.active_tickets} Active
+                        <AnimatedNumber value={st.active_tickets} suffix=" Active" />
                       </div>
                       <div style={{ fontSize: '10px', color: '#A0A0A0' }}>
-                        {st.resolved_tickets} Resolved
+                        <AnimatedNumber value={st.resolved_tickets} suffix=" Resolved" />
                       </div>
                     </div>
                   </div>
@@ -384,6 +462,7 @@ export const AdminDashboard = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
           {/* Category Distribution */}
           <div
+            className="stagger-7"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
@@ -405,7 +484,7 @@ export const AdminDashboard = () => {
 
             {stats?.category_counts && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {Object.entries(stats.category_counts).map(([cat, count]) => (
+                {Object.entries(stats.category_counts).map(([cat, count], idx) => (
                   <div
                     key={cat}
                     style={{
@@ -416,11 +495,22 @@ export const AdminDashboard = () => {
                       background: '#FFFFFF',
                       border: '1px solid #E7E7E9',
                       borderRadius: '6px',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      transition: 'border-color 0.15s, transform 0.15s',
+                      animation: `itemSlideRight 0.3s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.03}s both`
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#D5D5D8';
+                      e.currentTarget.style.transform = 'translateX(2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#E7E7E9';
+                      e.currentTarget.style.transform = 'none';
                     }}
                   >
                     <span style={{ color: '#222222', fontWeight: '500' }}>{cat}</span>
                     <span
+                      className="badge-pop"
                       style={{
                         background: count > 0 ? '#FCECED' : '#F3F4F6',
                         color: count > 0 ? '#F04B4F' : '#777777',
@@ -429,7 +519,7 @@ export const AdminDashboard = () => {
                         fontWeight: '700'
                       }}
                     >
-                      {count}
+                      <AnimatedNumber value={count} />
                     </span>
                   </div>
                 ))}
@@ -439,6 +529,7 @@ export const AdminDashboard = () => {
 
           {/* Recent Complaints */}
           <div
+            className="stagger-8"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
@@ -457,7 +548,7 @@ export const AdminDashboard = () => {
 
             {stats?.recent_complaints && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {stats.recent_complaints.slice(0, 5).map((item) => (
+                {stats.recent_complaints.slice(0, 5).map((item, idx) => (
                   <div
                     key={item.id}
                     onClick={() => navigate('/admin/complaints')}
@@ -469,7 +560,19 @@ export const AdminDashboard = () => {
                       background: '#FFFFFF',
                       border: '1px solid #E7E7E9',
                       borderRadius: '6px',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      transition: 'background-color 0.15s, border-color 0.15s, transform 0.15s',
+                      animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.04}s both`
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#FAFAFA';
+                      e.currentTarget.style.borderColor = '#D5D5D8';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#FFFFFF';
+                      e.currentTarget.style.borderColor = '#E7E7E9';
+                      e.currentTarget.style.transform = 'none';
                     }}
                   >
                     <div style={{ minWidth: 0 }}>

@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
-  Calendar,
-  User,
-  Building,
-  CheckCircle2,
-  Clock,
   AlertCircle,
   Image as ImageIcon,
   Maximize2,
@@ -14,7 +9,7 @@ import {
   Star,
   RefreshCcw,
   Wrench,
-  ShieldCheck
+  CheckCircle2
 } from 'lucide-react';
 import { api, API_ROOT } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
@@ -25,10 +20,11 @@ import { CommentsThread } from '../../components/CommentsThread';
 import { SLACountdownBadge } from '../../components/SLACountdownBadge';
 import { FeedbackModal } from '../../components/FeedbackModal';
 import { Modal } from '../../components/Modal';
+import { useToast } from '../../context/ToastContext';
 
 export const ResidentComplaintDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const toast = useToast();
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -69,12 +65,13 @@ export const ResidentComplaintDetail = () => {
       setReopenSuccess('Reopen request submitted to administration for review.');
       setReopenReason('');
       fetchDetail();
+      toast.success('Reopen requested', 'Society admin will review your ticket reopening request.');
       setTimeout(() => {
         setReopenModalOpen(false);
         setReopenSuccess('');
       }, 1400);
     } catch (err) {
-      alert(err.message || 'Failed to submit reopen request.');
+      toast.error('Reopen failed', err.message || 'Failed to submit reopen request.');
     } finally {
       setReopenSubmitting(false);
     }
@@ -98,6 +95,7 @@ export const ResidentComplaintDetail = () => {
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 0', color: '#777777', fontSize: '13px' }}>
+        <span className="btn-spinner" style={{ borderColor: 'rgba(240,75,79,0.3)', borderTopColor: '#F04B4F', width: '20px', height: '20px', margin: '0 auto 10px', display: 'block' }} />
         Loading complaint record...
       </div>
     );
@@ -145,6 +143,7 @@ export const ResidentComplaintDetail = () => {
         {/* Reopen / Feedback Notification if Resolved */}
         {isResolved && (
           <div
+            className="stagger-1"
             style={{
               padding: '14px 20px',
               marginBottom: '20px',
@@ -156,7 +155,8 @@ export const ResidentComplaintDetail = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               flexWrap: 'wrap',
-              gap: '12px'
+              gap: '12px',
+              boxShadow: '0 2px 8px rgba(70, 184, 120, 0.08)'
             }}
           >
             <div>
@@ -200,6 +200,7 @@ export const ResidentComplaintDetail = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
             {/* Title & Description Card */}
             <div
+              className="stagger-1"
               style={{
                 backgroundColor: '#FFFFFF',
                 border: '1px solid #E7E7E9',
@@ -266,7 +267,16 @@ export const ResidentComplaintDetail = () => {
                           cursor: 'pointer',
                           border: '1px solid #E7E7E9',
                           width: '140px',
-                          height: '95px'
+                          height: '95px',
+                          transition: 'transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'scale(1.04)';
+                          e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'none';
+                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
                         <img
@@ -305,6 +315,7 @@ export const ResidentComplaintDetail = () => {
 
             {/* Discussion Thread Card */}
             <div
+              className="stagger-2"
               style={{
                 backgroundColor: '#FFFFFF',
                 border: '1px solid #E7E7E9',
@@ -318,6 +329,7 @@ export const ResidentComplaintDetail = () => {
 
             {/* Lifecycle & Status History Timeline Card */}
             <div
+              className="stagger-3"
               style={{
                 backgroundColor: '#FFFFFF',
                 border: '1px solid #E7E7E9',
@@ -341,6 +353,7 @@ export const ResidentComplaintDetail = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {/* Status & Priority Card */}
             <div
+              className="stagger-2"
               style={{
                 backgroundColor: '#FFFFFF',
                 border: '1px solid #E7E7E9',
@@ -377,6 +390,7 @@ export const ResidentComplaintDetail = () => {
 
             {/* Assigned Staff Card */}
             <div
+              className="stagger-3"
               style={{
                 backgroundColor: '#FFFFFF',
                 border: '1px solid #E7E7E9',
@@ -424,6 +438,7 @@ export const ResidentComplaintDetail = () => {
 
             {/* Resident & Unit Info */}
             <div
+              className="stagger-4"
               style={{
                 backgroundColor: '#FFFFFF',
                 border: '1px solid #E7E7E9',
@@ -451,34 +466,22 @@ export const ResidentComplaintDetail = () => {
         </div>
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal with Zoom Animation */}
       {lightboxImage && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.85)',
-            zIndex: 2000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}
+          className="lightbox-backdrop"
           onClick={() => setLightboxImage(null)}
         >
-          <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }} onClick={(e) => e.stopPropagation()}>
+          <div className="lightbox-content" style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
             <img
               src={lightboxImage}
               alt="Expanded view"
-              style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '8px', objectFit: 'contain' }}
+              style={{ maxWidth: '100%', maxHeight: '82vh', borderRadius: '10px', objectFit: 'contain', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}
             />
             <button
               onClick={() => setLightboxImage(null)}
               className="btn btn-secondary btn-sm"
-              style={{ position: 'absolute', top: '-38px', right: 0, padding: '5px 10px' }}
+              style={{ position: 'absolute', top: '-42px', right: 0, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
             >
               <X size={15} />
               <span>Close</span>
@@ -495,6 +498,7 @@ export const ResidentComplaintDetail = () => {
           complaintId={complaint.id}
           onSubmitted={(fb) => {
             setComplaint(prev => ({ ...prev, feedback: fb }));
+            toast.success('Feedback recorded', 'Thank you for rating our maintenance service!');
           }}
         />
       )}
@@ -535,6 +539,7 @@ export const ResidentComplaintDetail = () => {
                   Cancel
                 </button>
                 <button type="submit" disabled={reopenSubmitting} className="btn btn-primary">
+                  {reopenSubmitting ? <span className="btn-spinner" style={{ width: '13px', height: '13px' }} /> : null}
                   <span>{reopenSubmitting ? 'Submitting...' : 'Submit Reopen'}</span>
                 </button>
               </div>

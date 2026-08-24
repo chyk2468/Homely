@@ -17,7 +17,8 @@ export const SLACountdownBadge = ({ complaint }) => {
           fontWeight: '600',
           background: '#EAF7F0',
           color: '#15803D',
-          border: '1px solid #C4EDD6'
+          border: '1px solid #C4EDD6',
+          transition: 'all 0.2s cubic-bezier(0.22, 1, 0.36, 1)'
         }}
       >
         <CheckCircle size={11} />
@@ -33,12 +34,14 @@ export const SLACountdownBadge = ({ complaint }) => {
   let border = '#E5E7EB';
   let color = '#4B5563';
   let Icon = Clock;
+  let pulseClass = '';
 
   if (status === 'overdue' || complaint.is_overdue) {
     bg = '#FCECED';
     border = '#F9D0D2';
     color = '#F04B4F';
     Icon = Flame;
+    pulseClass = 'overdue-pulse';
   } else if (status === 'approaching') {
     bg = '#FDF6E9';
     border = '#F8E3BC';
@@ -48,6 +51,7 @@ export const SLACountdownBadge = ({ complaint }) => {
 
   return (
     <span
+      className={pulseClass}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -58,7 +62,8 @@ export const SLACountdownBadge = ({ complaint }) => {
         fontWeight: '600',
         background: bg,
         color: color,
-        border: `1px solid ${border}`
+        border: `1px solid ${border}`,
+        transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)'
       }}
       title={`Category SLA: ${complaint.category_sla_days || 7} days`}
     >

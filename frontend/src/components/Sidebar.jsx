@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -20,10 +20,14 @@ import { useAuth } from '../context/AuthContext';
 export const Sidebar = ({ overdueCount = 0 }) => {
   const { user, isAdmin, isStaff, logout } = useAuth();
   const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      logout();
+      navigate('/login');
+    }, 280);
   };
 
   const residentNav = [
@@ -58,6 +62,7 @@ export const Sidebar = ({ overdueCount = 0 }) => {
 
   return (
     <aside
+      className="sidebar-container"
       style={{
         width: '240px',
         backgroundColor: '#FFFFFF',
@@ -69,7 +74,10 @@ export const Sidebar = ({ overdueCount = 0 }) => {
         height: '100vh',
         position: 'sticky',
         top: 0,
-        zIndex: 40
+        zIndex: 40,
+        opacity: isLoggingOut ? 0 : 1,
+        transform: isLoggingOut ? 'translateX(-24px)' : 'none',
+        transition: 'opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)'
       }}
     >
       {/* Brand Header */}
@@ -93,7 +101,8 @@ export const Sidebar = ({ overdueCount = 0 }) => {
               alignItems: 'center',
               justifyContent: 'center',
               color: '#F04B4F',
-              flexShrink: 0
+              flexShrink: 0,
+              transition: 'transform 0.2s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
           >
             <Building2 size={20} />
@@ -109,34 +118,38 @@ export const Sidebar = ({ overdueCount = 0 }) => {
         </div>
 
         {/* Navigation Links */}
-        <nav style={{ padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {navItems.map((item) => {
+        <nav style={{ padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {navItems.map((item, index) => {
             const Icon = item.icon;
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
+                className={({ isActive }) =>
+                  `nav-link-item ${isActive ? 'active' : ''}`
+                }
                 style={({ isActive }) => ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '9px 12px',
                   borderRadius: '8px',
-                  color: isActive ? '#F04B4F' : '#777777',
+                  color: isActive ? '#F04B4F' : '#666666',
                   background: isActive ? '#FCECED' : 'transparent',
                   fontWeight: isActive ? '600' : '500',
                   fontSize: '13px',
                   textDecoration: 'none',
-                  transition: 'all 0.15s ease'
+                  animationDelay: `${0.04 * (index + 1)}s`
                 })}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Icon size={17} />
-                  <span>{item.label}</span>
+                  <Icon size={17} className="nav-icon" />
+                  <span className="nav-text">{item.label}</span>
                 </div>
 
                 {item.badge && (
                   <span
+                    className="badge-pop"
                     style={{
                       fontSize: '10px',
                       padding: '1px 6px',
@@ -173,10 +186,16 @@ export const Sidebar = ({ overdueCount = 0 }) => {
             padding: '6px 8px',
             borderRadius: '8px',
             cursor: 'pointer',
-            transition: 'background 0.15s ease'
+            transition: 'background 0.15s ease, transform 0.15s ease'
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F7F7F8'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#F7F7F8';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.transform = 'none';
+          }}
           title="Click to view and edit profile"
         >
           <div
@@ -220,11 +239,12 @@ export const Sidebar = ({ overdueCount = 0 }) => {
 
         <button
           onClick={handleLogout}
+          disabled={isLoggingOut}
           className="btn btn-secondary btn-sm"
           style={{ width: '100%', padding: '7px', fontSize: '12px', display: 'flex', gap: '6px', color: '#777777' }}
         >
           <LogOut size={14} />
-          <span>Sign Out</span>
+          <span>{isLoggingOut ? 'Signing Out...' : 'Sign Out'}</span>
         </button>
       </div>
     </aside>

@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { MessageSquare, Send, User, ShieldCheck, Wrench, Clock } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export const CommentsThread = ({ complaintId, initialComments = [] }) => {
   const { user } = useAuth();
+  const toast = useToast();
   const [comments, setComments] = useState(initialComments);
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -39,8 +41,9 @@ export const CommentsThread = ({ complaintId, initialComments = [] }) => {
       const newComment = await api.postComment(complaintId, message.trim());
       setComments(prev => [...prev, newComment]);
       setMessage('');
+      toast.success('Message sent', 'Your remark was logged to the discussion thread.');
     } catch (err) {
-      alert(err.message || 'Failed to post message.');
+      toast.error('Failed to send', err.message || 'Failed to post message.');
     } finally {
       setSubmitting(false);
     }
@@ -107,7 +110,11 @@ export const CommentsThread = ({ complaintId, initialComments = [] }) => {
           paddingRight: '4px'
         }}
       >
-        {comments.length === 0 ? (
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '24px', color: '#777777', fontSize: '13px' }}>
+            Loading discussion...
+          </div>
+        ) : comments.length === 0 ? (
           <div
             style={{
               padding: '20px',
@@ -122,16 +129,18 @@ export const CommentsThread = ({ complaintId, initialComments = [] }) => {
             No discussion notes yet. Send a message to coordinate with maintenance staff and admins.
           </div>
         ) : (
-          comments.map((c) => {
+          comments.map((c, index) => {
             const isMe = user?.id === c.author_id;
             return (
               <div
-                key={c.id}
+                key={c.id || index}
+                className="message-item-enter"
                 style={{
                   background: isMe ? '#FCECED' : '#FFFFFF',
                   border: isMe ? '1px solid #F9D0D2' : '1px solid #E7E7E9',
                   borderRadius: '8px',
-                  padding: '12px 14px'
+                  padding: '12px 14px',
+                  transition: 'transform 0.15s ease'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
@@ -169,6 +178,7 @@ export const CommentsThread = ({ complaintId, initialComments = [] }) => {
             placeholder="Type a message or note..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            disabled={submitting}
             style={{ fontSize: '13px', padding: '9px 12px', minHeight: '60px' }}
           />
           <button
@@ -177,8 +187,12 @@ export const CommentsThread = ({ complaintId, initialComments = [] }) => {
             className="btn btn-primary"
             style={{ padding: '10px 16px', height: '100%', flexShrink: 0 }}
           >
-            <Send size={14} />
-            <span>Send</span>
+            {submitting ? (
+              <span className="btn-spinner" style={{ width: '14px', height: '14px' }} />
+            ) : (
+              <Send size={14} />
+            )}
+            <span>{submitting ? 'Sending...' : 'Send'}</span>
           </button>
         </div>
       </form>

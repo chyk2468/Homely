@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Building2, LogIn, AlertCircle } from 'lucide-react';
+import { Building2, LogIn, AlertCircle, Eye, EyeOff, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import './Login.css';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -21,127 +27,166 @@ export const Login = () => {
     }
   };
 
+  const triggerShake = () => {
+    setIsShaking(true);
+    setTimeout(() => {
+      setIsShaking(false);
+    }, 450);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!email || !password) {
+      setError('Please provide both email and password.');
+      triggerShake();
+      return;
+    }
+
     setLoading(true);
 
     try {
       const user = await login(email, password);
-      handleRedirect(user.role);
-    } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
-    } finally {
       setLoading(false);
+      setIsSuccess(true);
+
+      // Brief pause to display success checkmark, then graceful exit transition
+      setTimeout(() => {
+        setIsExiting(true);
+        setTimeout(() => {
+          handleRedirect(user.role);
+        }, 380);
+      }, 420);
+    } catch (err) {
+      setLoading(false);
+      setError(err.message || 'Login failed. Please check your credentials.');
+      triggerShake();
     }
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        backgroundColor: '#F7F7F8'
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: '440px' }}>
-        {/* Logo and Header */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              background: '#FCECED',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#F04B4F',
-              marginBottom: '12px'
-            }}
-          >
-            <Building2 size={26} />
+    <div className="login-page-container">
+      {/* 2. Animated Ambient Background Shapes */}
+      <div className="login-ambient-background" aria-hidden="true">
+        <div className="ambient-orb ambient-orb-1" />
+        <div className="ambient-orb ambient-orb-2" />
+        <div className="ambient-orb ambient-orb-3" />
+      </div>
+
+      {/* 1. Page Content Wrapper */}
+      <div className={`login-content-wrapper ${isExiting ? 'login-exiting' : ''}`}>
+        {/* Header & Logo */}
+        <div className="login-header">
+          <div className="login-logo-wrapper">
+            <div className="login-logo-container" title="Homely CRM">
+              <Building2 size={26} strokeWidth={2.2} />
+            </div>
           </div>
-          <h1 style={{ fontSize: '24px', color: '#222222', margin: 0, fontWeight: '800' }}>Homely</h1>
-          <p style={{ color: '#777777', fontSize: '13px', marginTop: '4px' }}>
+          <h1 className="login-title">Homely</h1>
+          <p className="login-subtitle">
             Apartment Society Maintenance & Operations CRM
           </p>
         </div>
 
-        {/* Form Card */}
-        <div
-          style={{
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #E7E7E9',
-            borderRadius: '12px',
-            padding: '28px',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
-          }}
-        >
+        {/* 4. Login Form Card */}
+        <div className={`login-card ${isShaking ? 'card-shake' : ''}`}>
+          {/* 12. Error Banner with smooth slide-down */}
           {error && (
-            <div
-              style={{
-                background: '#FCECED',
-                border: '1px solid #F9D0D2',
-                borderRadius: '8px',
-                padding: '10px 12px',
-                color: '#F04B4F',
-                fontSize: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '16px'
-              }}
-            >
+            <div className="login-error-banner" role="alert">
               <AlertCircle size={15} style={{ flexShrink: 0 }} />
               <div>{error}</div>
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <label className="input-label">Email Address</label>
-              <input
-                type="email"
-                required
-                className="input-field"
-                placeholder="name@society.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+          <form onSubmit={handleSubmit} noValidate>
+            {/* Email Field (Stagger item 1) */}
+            <div className="login-input-group stagger-1">
+              <label htmlFor="login-email" className="login-input-label">
+                Email Address
+              </label>
+              <div className="login-input-wrapper">
+                <input
+                  id="login-email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  className="login-input-field"
+                  placeholder="name@society.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading || isSuccess}
+                />
+              </div>
             </div>
 
-            <div className="input-group">
-              <label className="input-label">Password</label>
-              <input
-                type="password"
-                required
-                className="input-field"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+            {/* Password Field with Eye Toggle (Stagger item 2) */}
+            <div className="login-input-group stagger-2">
+              <label htmlFor="login-password" className="login-input-label">
+                Password
+              </label>
+              <div className="login-input-wrapper">
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete="current-password"
+                  className="login-input-field has-eye-toggle"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading || isSuccess}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <EyeOff size={16} className="password-eye-icon" />
+                  ) : (
+                    <Eye size={16} className="password-eye-icon" />
+                  )}
+                </button>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '11px', marginTop: '6px', fontSize: '14px' }}
-            >
-              <LogIn size={16} />
-              <span>{loading ? 'Signing In...' : 'Sign In'}</span>
-            </button>
+            {/* Sign In Button (Stagger item 3) */}
+            <div className="stagger-3">
+              <button
+                type="submit"
+                disabled={loading || isSuccess}
+                className={`login-submit-btn ${isSuccess ? 'btn-success-state' : ''}`}
+                aria-busy={loading}
+              >
+                {loading ? (
+                  <span className="btn-content">
+                    <span className="btn-spinner" />
+                    <span>Signing In...</span>
+                  </span>
+                ) : isSuccess ? (
+                  <span className="btn-content">
+                    <Check size={18} strokeWidth={2.8} className="btn-checkmark-icon" />
+                    <span>Success!</span>
+                  </span>
+                ) : (
+                  <span className="btn-content">
+                    <LogIn size={16} strokeWidth={2.2} />
+                    <span>Sign In</span>
+                  </span>
+                )}
+              </button>
+            </div>
           </form>
         </div>
 
-        {/* Footer link to Register */}
-        <div style={{ textAlign: 'center', marginTop: '18px', fontSize: '13px', color: '#777777' }}>
+        {/* 11. Footer Registration Link (Stagger item 4) */}
+        <div className="login-footer-text stagger-footer">
           Don't have an account?{' '}
-          <Link to="/register" style={{ color: '#F04B4F', fontWeight: '600', textDecoration: 'none' }}>
+          <Link to="/register" className="register-animated-link">
             Register as Resident
           </Link>
         </div>

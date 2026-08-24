@@ -8,7 +8,8 @@ import {
   ListOrdered,
   Flame,
   ArrowRight,
-  RefreshCw
+  RefreshCw,
+  Check
 } from 'lucide-react';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
@@ -19,28 +20,40 @@ import { PriorityBadge } from '../../components/PriorityBadge';
 import { SLACountdownBadge } from '../../components/SLACountdownBadge';
 import { Modal } from '../../components/Modal';
 import { CommentsThread } from '../../components/CommentsThread';
+import { SkeletonStatsCard, SkeletonListRow } from '../../components/Skeleton';
+import { useToast } from '../../context/ToastContext';
 
 export const StaffDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Manage modal
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [actionNote, setActionNote] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
 
-  const fetchStaffData = async () => {
-    setLoading(true);
+  const fetchStaffData = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    else setLoading(true);
+
     try {
       const complaintsData = await api.getStaffComplaints();
       setComplaints(complaintsData);
+      if (isManual) {
+        toast.success('Queue refreshed', 'Latest assigned complaints retrieved.');
+      }
     } catch (err) {
       console.error('Failed to load staff dashboard:', err);
+      if (isManual) toast.error('Refresh failed', 'Could not refresh assigned complaints.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -60,8 +73,9 @@ export const StaffDashboard = () => {
       setSelectedComplaint(detail);
       setNewStatus(detail.status);
       setActionNote('');
+      setUpdateSuccess(false);
     } catch {
-      alert('Failed to load complaint details.');
+      toast.error('Load failed', 'Could not load job details.');
     }
   };
 
@@ -72,12 +86,17 @@ export const StaffDashboard = () => {
 
     try {
       await api.updateStaffComplaintStatus(selectedComplaint.id, newStatus, actionNote);
-      setSelectedComplaint(null);
-      fetchStaffData();
-    } catch (err) {
-      alert(err.message || 'Failed to update ticket.');
-    } finally {
       setUpdating(false);
+      setUpdateSuccess(true);
+      toast.success('Job updated', `Status changed to "${newStatus}".`);
+
+      setTimeout(() => {
+        setSelectedComplaint(null);
+        fetchStaffData();
+      }, 700);
+    } catch (err) {
+      setUpdating(false);
+      toast.error('Update failed', err.message || 'Failed to update ticket.');
     }
   };
 
@@ -98,9 +117,13 @@ export const StaffDashboard = () => {
         title="Staff Workspace"
         subtitle={`Logged in as ${user?.full_name} (${user?.specialization || 'Maintenance Specialist'})`}
         extraAction={
-          <button onClick={fetchStaffData} className="btn btn-secondary btn-sm" disabled={loading}>
-            <RefreshCw size={13} className={loading ? 'spin' : ''} />
-            <span>Refresh</span>
+          <button
+            onClick={() => fetchStaffData(true)}
+            className="btn btn-secondary btn-sm"
+            disabled={loading || refreshing}
+          >
+            <RefreshCw size={13} className={refreshing ? 'spin-once' : ''} />
+            <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
         }
       />
@@ -109,6 +132,7 @@ export const StaffDashboard = () => {
         {/* Overdue Alert Banner if any */}
         {overdueCount > 0 && (
           <div
+            className="stagger-1"
             style={{
               padding: '14px 18px',
               marginBottom: '20px',
@@ -119,11 +143,12 @@ export const StaffDashboard = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: '16px'
+              gap: '16px',
+              boxShadow: '0 2px 8px rgba(240, 75, 79, 0.08)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Flame size={20} color="#F04B4F" />
+              <Flame size={20} color="#F04B4F" className="overdue-pulse" />
               <div>
                 <div style={{ fontSize: '13px', fontWeight: '700', color: '#F04B4F' }}>
                   {overdueCount} Assigned Ticket{overdueCount > 1 ? 's' : ''} Overdue
@@ -142,50 +167,71 @@ export const StaffDashboard = () => {
         )}
 
         {/* 4 KPI Cards */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px',
-            marginBottom: '24px'
-          }}
-        >
-          <StatsCard
-            title="Assigned Tickets"
-            value={totalAssigned}
-            icon={ListOrdered}
-            color="coral"
-            subtitle="Your active queue"
-            onClick={() => navigate('/staff/my-assigned')}
-          />
-          <StatsCard
-            title="Pending Dispatch"
-            value={openCount}
-            icon={AlertCircle}
-            color="coral"
-            subtitle="Action required"
-            onClick={() => navigate('/staff/my-assigned?status=Open')}
-          />
-          <StatsCard
-            title="In Progress"
-            value={inProgressCount}
-            icon={Clock}
-            color="amber"
-            subtitle="Work underway"
-            onClick={() => navigate('/staff/my-assigned?status=In+Progress')}
-          />
-          <StatsCard
-            title="Resolved by You"
-            value={resolvedCount}
-            icon={CheckCircle2}
-            color="emerald"
-            subtitle="Completed jobs"
-            onClick={() => navigate('/staff/my-assigned?status=Resolved')}
-          />
-        </div>
+        {loading && complaints.length === 0 ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px',
+              marginBottom: '24px'
+            }}
+          >
+            <SkeletonStatsCard />
+            <SkeletonStatsCard />
+            <SkeletonStatsCard />
+            <SkeletonStatsCard />
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px',
+              marginBottom: '24px'
+            }}
+          >
+            <StatsCard
+              title="Assigned Tickets"
+              value={totalAssigned}
+              icon={ListOrdered}
+              color="coral"
+              subtitle="Your active queue"
+              staggerClass="stagger-1"
+              onClick={() => navigate('/staff/my-assigned')}
+            />
+            <StatsCard
+              title="Pending Dispatch"
+              value={openCount}
+              icon={AlertCircle}
+              color="coral"
+              subtitle="Action required"
+              staggerClass="stagger-2"
+              onClick={() => navigate('/staff/my-assigned?status=Open')}
+            />
+            <StatsCard
+              title="In Progress"
+              value={inProgressCount}
+              icon={Clock}
+              color="amber"
+              subtitle="Work underway"
+              staggerClass="stagger-3"
+              onClick={() => navigate('/staff/my-assigned?status=In+Progress')}
+            />
+            <StatsCard
+              title="Resolved by You"
+              value={resolvedCount}
+              icon={CheckCircle2}
+              color="emerald"
+              subtitle="Completed jobs"
+              staggerClass="stagger-4"
+              onClick={() => navigate('/staff/my-assigned?status=Resolved')}
+            />
+          </div>
+        )}
 
         {/* Assigned Tickets Section */}
         <div
+          className="stagger-3"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -209,11 +255,12 @@ export const StaffDashboard = () => {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: '#777777', fontSize: '13px' }}>
-              Loading assigned queue...
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <SkeletonListRow />
+              <SkeletonListRow />
             </div>
           ) : complaints.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '36px 20px' }}>
+            <div style={{ textAlign: 'center', padding: '36px 20px', animation: 'scalePopIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
               <Wrench size={32} color="#A0A0A0" style={{ margin: '0 auto 10px' }} />
               <h3 style={{ fontSize: '15px', color: '#222222', marginBottom: '4px' }}>
                 Queue is Clear!
@@ -224,7 +271,7 @@ export const StaffDashboard = () => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {complaints.slice(0, 6).map((item) => (
+              {complaints.slice(0, 6).map((item, idx) => (
                 <div
                   key={item.id}
                   style={{
@@ -237,13 +284,18 @@ export const StaffDashboard = () => {
                     border: '1px solid #E7E7E9',
                     borderLeft: item.is_overdue && item.status !== 'Resolved' ? '4px solid #F04B4F' : '1px solid #E7E7E9',
                     backgroundColor: '#FFFFFF',
-                    transition: 'all 0.15s ease'
+                    transition: 'background-color 0.15s, border-color 0.15s, transform 0.15s',
+                    animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.03}s both`
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#FAFAFA';
+                    e.currentTarget.style.transform = 'translateY(-1.5px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = '#FFFFFF';
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   <div style={{ minWidth: 0, flex: 1 }}>
@@ -349,8 +401,17 @@ export const StaffDashboard = () => {
                 <button type="button" onClick={() => setSelectedComplaint(null)} className="btn btn-secondary">
                   Cancel
                 </button>
-                <button type="submit" disabled={updating} className="btn btn-primary">
-                  <span>{updating ? 'Saving...' : 'Save & Record Progress'}</span>
+                <button
+                  type="submit"
+                  disabled={updating || updateSuccess}
+                  className={`btn ${updateSuccess ? 'btn-success' : 'btn-primary'}`}
+                >
+                  {updating ? (
+                    <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                  ) : updateSuccess ? (
+                    <Check size={14} className="btn-checkmark-icon" />
+                  ) : null}
+                  <span>{updating ? 'Saving...' : updateSuccess ? 'Recorded!' : 'Save & Record Progress'}</span>
                 </button>
               </div>
             </form>

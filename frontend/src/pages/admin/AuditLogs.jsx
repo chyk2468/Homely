@@ -2,20 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, RefreshCw, Clock } from 'lucide-react';
 import { api } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
+import { SkeletonListRow } from '../../components/Skeleton';
+import { useToast } from '../../context/ToastContext';
 
 export const AuditLogs = () => {
+  const toast = useToast();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchLogs = async () => {
-    setLoading(true);
+  const fetchLogs = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    else setLoading(true);
+
     try {
       const data = await api.getAuditLogs();
       setLogs(data);
+      if (isManual) toast.success('Audit trail refreshed', 'Latest log events retrieved.');
     } catch (err) {
       console.error('Failed to load audit logs:', err);
+      if (isManual) toast.error('Refresh error', 'Could not refresh audit logs.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -57,15 +66,20 @@ export const AuditLogs = () => {
         title="Administrative Audit Trail"
         subtitle="Immutable chronological ledger of all administrative actions and configuration changes"
         extraAction={
-          <button onClick={fetchLogs} className="btn btn-secondary btn-sm" disabled={loading}>
-            <RefreshCw size={13} className={loading ? 'spin' : ''} />
-            <span>Refresh</span>
+          <button
+            onClick={() => fetchLogs(true)}
+            className="btn btn-secondary btn-sm"
+            disabled={loading || refreshing}
+          >
+            <RefreshCw size={13} className={refreshing ? 'spin-once' : ''} />
+            <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
         }
       />
 
       <div className="page-body">
         <div
+          className="stagger-1"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -84,8 +98,10 @@ export const AuditLogs = () => {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
-              Loading audit logs...
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <SkeletonListRow />
+              <SkeletonListRow />
+              <SkeletonListRow />
             </div>
           ) : logs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#777777' }}>
@@ -104,14 +120,21 @@ export const AuditLogs = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {logs.map((log) => {
+                  {logs.map((log, idx) => {
                     const badge = getActionBadgeStyle(log.action);
                     return (
                       <tr
                         key={log.id}
                         style={{
                           borderBottom: '1px solid #F3F3F5',
-                          transition: 'background 0.15s'
+                          transition: 'background 0.15s',
+                          animation: `itemSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.02}s both`
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#FAFAFA';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'transparent';
                         }}
                       >
                         <td style={{ padding: '10px 12px', color: '#777777', whiteSpace: 'nowrap' }}>

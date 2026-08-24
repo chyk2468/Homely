@@ -4,7 +4,8 @@ import {
   Search,
   Wrench,
   RefreshCw,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Check
 } from 'lucide-react';
 import { api, API_ROOT } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
@@ -14,13 +15,18 @@ import { SLACountdownBadge } from '../../components/SLACountdownBadge';
 import { Modal } from '../../components/Modal';
 import { Timeline } from '../../components/Timeline';
 import { CommentsThread } from '../../components/CommentsThread';
+import { SkeletonListRow } from '../../components/Skeleton';
+import { useToast } from '../../context/ToastContext';
 
 export const AllComplaints = () => {
   const [searchParams] = useSearchParams();
+  const toast = useToast();
   const [complaints, setComplaints] = useState([]);
   const [staffList, setStaffList] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get('category') || '');
@@ -37,9 +43,12 @@ export const AllComplaints = () => {
   const [assignedStaffId, setAssignedStaffId] = useState('');
   const [actionNote, setActionNote] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
 
-  const fetchComplaints = async () => {
-    setLoading(true);
+  const fetchComplaints = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    else setLoading(true);
+
     try {
       const params = {};
       if (categoryFilter) params.category = categoryFilter;
@@ -57,10 +66,15 @@ export const AllComplaints = () => {
       setComplaints(complaintsData);
       setStaffList(staffData);
       setCategories(catsData);
+      if (isManual) {
+        toast.success('Registry updated', 'Retrieved latest complaint records.');
+      }
     } catch (err) {
       console.error('Failed to load complaints:', err);
+      if (isManual) toast.error('Refresh failed', 'Could not load complaints.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -68,9 +82,11 @@ export const AllComplaints = () => {
     fetchComplaints();
   }, [categoryFilter, statusFilter, priorityFilter, isOverdueFilter]);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    fetchComplaints();
+    setSearching(true);
+    await fetchComplaints();
+    setSearching(false);
   };
 
   const openComplaintModal = async (c) => {
@@ -82,8 +98,9 @@ export const AllComplaints = () => {
       setAssignedStaffId(detail.assigned_to ? String(detail.assigned_to) : '');
       setActionNote('');
       setActiveTab('details');
+      setUpdateSuccess(false);
     } catch {
-      alert('Failed to load full complaint record.');
+      toast.error('Load error', 'Failed to load full complaint record.');
     }
   };
 
@@ -105,12 +122,17 @@ export const AllComplaints = () => {
         await api.assignComplaint(selectedComplaint.id, staffIdNum, actionNote);
       }
 
-      setSelectedComplaint(null);
-      fetchComplaints();
-    } catch (err) {
-      alert(err.message || 'Failed to update complaint.');
-    } finally {
       setUpdating(false);
+      setUpdateSuccess(true);
+      toast.success('Complaint updated', `Changes to #${selectedComplaint.id} saved.`);
+
+      setTimeout(() => {
+        setSelectedComplaint(null);
+        fetchComplaints();
+      }, 700);
+    } catch (err) {
+      setUpdating(false);
+      toast.error('Update failed', err.message || 'Failed to update complaint.');
     }
   };
 
@@ -118,11 +140,12 @@ export const AllComplaints = () => {
     const adminNotes = prompt(`Enter optional remarks for ${decision.toLowerCase()} reopen request:`) || '';
     try {
       await api.reviewReopenRequest(requestId, decision, adminNotes);
+      toast.success('Review complete', `Reopen request ${decision.toLowerCase()}.`);
       const refreshed = await api.getComplaint(selectedComplaint.id);
       setSelectedComplaint(refreshed);
       fetchComplaints();
     } catch (err) {
-      alert(err.message || 'Failed to review reopen request.');
+      toast.error('Action failed', err.message || 'Failed to review reopen request.');
     }
   };
 
@@ -133,8 +156,9 @@ export const AllComplaints = () => {
       if (statusFilter) params.status = statusFilter;
       if (isOverdueFilter) params.is_overdue = isOverdueFilter === 'true';
       await api.downloadComplaintsCsv(params);
+      toast.success('Report exported', 'Complaints CSV downloaded successfully.');
     } catch (err) {
-      alert(err.message || 'Failed to export CSV report.');
+      toast.error('Export failed', err.message || 'Failed to export CSV report.');
     }
   };
 
@@ -162,9 +186,9 @@ export const AllComplaints = () => {
               <FileSpreadsheet size={14} color="#46B878" />
               <span>Export CSV</span>
             </button>
-            <button onClick={fetchComplaints} className="btn btn-secondary btn-sm" disabled={loading} style={{ padding: '6px 10px', fontSize: '12px' }}>
-              <RefreshCw size={13} className={loading ? 'spin' : ''} />
-              <span>Refresh</span>
+            <button onClick={() => fetchComplaints(true)} className="btn btn-secondary btn-sm" disabled={loading || refreshing} style={{ padding: '6px 10px', fontSize: '12px' }}>
+              <RefreshCw size={13} className={refreshing ? 'spin-once' : ''} />
+              <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
             </button>
           </div>
         }
@@ -173,6 +197,7 @@ export const AllComplaints = () => {
       <div className="page-body">
         {/* Search & Filter Bar */}
         <div
+          className="stagger-1"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -263,9 +288,13 @@ export const AllComplaints = () => {
                 </select>
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ padding: '9px 16px', fontSize: '13px' }}>
-                <Search size={14} />
-                <span>Search</span>
+              <button type="submit" disabled={searching} className="btn btn-primary" style={{ padding: '9px 16px', fontSize: '13px' }}>
+                {searching ? (
+                  <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                ) : (
+                  <Search size={14} />
+                )}
+                <span>{searching ? 'Filtering...' : 'Search'}</span>
               </button>
             </div>
           </form>
@@ -273,6 +302,7 @@ export const AllComplaints = () => {
 
         {/* Complaints List */}
         <div
+          className="stagger-2"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -291,8 +321,10 @@ export const AllComplaints = () => {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
-              Filtering records...
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <SkeletonListRow />
+              <SkeletonListRow />
+              <SkeletonListRow />
             </div>
           ) : complaints.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#777777', fontSize: '13px' }}>
@@ -300,7 +332,7 @@ export const AllComplaints = () => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {complaints.map((c) => (
+              {complaints.map((c, idx) => (
                 <div
                   key={c.id}
                   style={{
@@ -313,13 +345,18 @@ export const AllComplaints = () => {
                     border: '1px solid #E7E7E9',
                     borderLeft: c.is_overdue && c.status !== 'Resolved' ? '4px solid #F04B4F' : '1px solid #E7E7E9',
                     backgroundColor: '#FFFFFF',
-                    transition: 'all 0.15s ease'
+                    transition: 'all 0.18s cubic-bezier(0.22, 1, 0.36, 1)',
+                    animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.03}s both`
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#FAFAFA';
+                    e.currentTarget.style.transform = 'translateY(-1.5px)';
+                    e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.04)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = '#FFFFFF';
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   <div style={{ minWidth: 0, flex: 1 }}>
@@ -439,8 +476,17 @@ export const AllComplaints = () => {
               </div>
             )}
 
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid #E7E7E9', marginBottom: '16px', paddingBottom: '8px' }}>
+            {/* Tabs with Animated Sliding Style */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '6px',
+                borderBottom: '1px solid #E7E7E9',
+                marginBottom: '16px',
+                paddingBottom: '8px',
+                position: 'relative'
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setActiveTab('details')}
@@ -468,7 +514,7 @@ export const AllComplaints = () => {
             </div>
 
             {activeTab === 'details' && (
-              <div>
+              <div style={{ animation: 'pageFadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
                 {/* Resident & Ticket Info */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                   <div style={{ background: '#F7F7F8', padding: '12px 14px', borderRadius: '8px', border: '1px solid #E7E7E9' }}>
@@ -519,7 +565,16 @@ export const AllComplaints = () => {
                             height: '70px',
                             borderRadius: '6px',
                             overflow: 'hidden',
-                            border: '1px solid #E7E7E9'
+                            border: '1px solid #E7E7E9',
+                            transition: 'transform 0.18s, box-shadow 0.18s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.04)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'none';
+                            e.currentTarget.style.boxShadow = 'none';
                           }}
                         >
                           <img
@@ -602,8 +657,17 @@ export const AllComplaints = () => {
                     <button type="button" onClick={() => setSelectedComplaint(null)} className="btn btn-secondary">
                       Close
                     </button>
-                    <button type="submit" disabled={updating} className="btn btn-primary">
-                      <span>{updating ? 'Saving...' : 'Apply Changes'}</span>
+                    <button
+                      type="submit"
+                      disabled={updating || updateSuccess}
+                      className={`btn ${updateSuccess ? 'btn-success' : 'btn-primary'}`}
+                    >
+                      {updating ? (
+                        <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                      ) : updateSuccess ? (
+                        <Check size={14} className="btn-checkmark-icon" />
+                      ) : null}
+                      <span>{updating ? 'Saving...' : updateSuccess ? 'Saved' : 'Apply Changes'}</span>
                     </button>
                   </div>
                 </form>
@@ -611,13 +675,13 @@ export const AllComplaints = () => {
             )}
 
             {activeTab === 'timeline' && (
-              <div style={{ padding: '6px 0' }}>
+              <div style={{ padding: '6px 0', animation: 'pageFadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
                 <Timeline history={selectedComplaint.history} />
               </div>
             )}
 
             {activeTab === 'comments' && (
-              <div style={{ padding: '6px 0' }}>
+              <div style={{ padding: '6px 0', animation: 'pageFadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
                 <CommentsThread complaintId={selectedComplaint.id} initialComments={selectedComplaint.comments} />
               </div>
             )}

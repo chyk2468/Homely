@@ -17,6 +17,7 @@ import { StatsCard } from '../../components/StatsCard';
 import { StatusBadge } from '../../components/StatusBadge';
 import { PriorityBadge } from '../../components/PriorityBadge';
 import { SLACountdownBadge } from '../../components/SLACountdownBadge';
+import { SkeletonStatsCard, SkeletonListRow } from '../../components/Skeleton';
 
 export const ResidentDashboard = () => {
   const { user } = useAuth();
@@ -79,6 +80,7 @@ export const ResidentDashboard = () => {
         {/* Important Announcement Banner if any */}
         {importantNotice && (
           <div
+            className="stagger-1"
             style={{
               padding: '14px 18px',
               marginBottom: '20px',
@@ -89,7 +91,8 @@ export const ResidentDashboard = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: '16px'
+              gap: '16px',
+              boxShadow: '0 2px 8px rgba(240, 75, 79, 0.08)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -126,50 +129,71 @@ export const ResidentDashboard = () => {
         )}
 
         {/* Metrics Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px',
-            marginBottom: '24px'
-          }}
-        >
-          <StatsCard
-            title="Total Complaints"
-            value={total}
-            icon={ListOrdered}
-            color="coral"
-            subtitle="Raised by your unit"
-            onClick={() => navigate('/resident/my-complaints')}
-          />
-          <StatsCard
-            title="Open / Pending"
-            value={openCount}
-            icon={AlertCircle}
-            color="coral"
-            subtitle="Awaiting action"
-            onClick={() => navigate('/resident/my-complaints?status=Open')}
-          />
-          <StatsCard
-            title="In Progress"
-            value={inProgressCount}
-            icon={Clock}
-            color="amber"
-            subtitle="Work in progress"
-            onClick={() => navigate('/resident/my-complaints?status=In+Progress')}
-          />
-          <StatsCard
-            title="Resolved"
-            value={resolvedCount}
-            icon={CheckCircle2}
-            color="emerald"
-            subtitle="Successfully closed"
-            onClick={() => navigate('/resident/my-complaints?status=Resolved')}
-          />
-        </div>
+        {loading && complaints.length === 0 ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px',
+              marginBottom: '24px'
+            }}
+          >
+            <SkeletonStatsCard />
+            <SkeletonStatsCard />
+            <SkeletonStatsCard />
+            <SkeletonStatsCard />
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px',
+              marginBottom: '24px'
+            }}
+          >
+            <StatsCard
+              title="Total Complaints"
+              value={total}
+              icon={ListOrdered}
+              color="coral"
+              subtitle="Raised by your unit"
+              staggerClass="stagger-1"
+              onClick={() => navigate('/resident/my-complaints')}
+            />
+            <StatsCard
+              title="Open / Pending"
+              value={openCount}
+              icon={AlertCircle}
+              color="coral"
+              subtitle="Awaiting action"
+              staggerClass="stagger-2"
+              onClick={() => navigate('/resident/my-complaints?status=Open')}
+            />
+            <StatsCard
+              title="In Progress"
+              value={inProgressCount}
+              icon={Clock}
+              color="amber"
+              subtitle="Work in progress"
+              staggerClass="stagger-3"
+              onClick={() => navigate('/resident/my-complaints?status=In+Progress')}
+            />
+            <StatsCard
+              title="Resolved"
+              value={resolvedCount}
+              icon={CheckCircle2}
+              color="emerald"
+              subtitle="Successfully closed"
+              staggerClass="stagger-4"
+              onClick={() => navigate('/resident/my-complaints?status=Resolved')}
+            />
+          </div>
+        )}
 
         {/* Recent Complaints Section */}
         <div
+          className="stagger-3"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -193,11 +217,12 @@ export const ResidentDashboard = () => {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: '#777777', fontSize: '13px' }}>
-              Loading complaints...
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <SkeletonListRow />
+              <SkeletonListRow />
             </div>
           ) : complaints.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '36px 20px' }}>
+            <div style={{ textAlign: 'center', padding: '36px 20px', animation: 'scalePopIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
               <Building size={32} color="#A0A0A0" style={{ margin: '0 auto 10px' }} />
               <h3 style={{ fontSize: '15px', color: '#222222', marginBottom: '4px' }}>
                 No Complaints Raised Yet
@@ -212,7 +237,7 @@ export const ResidentDashboard = () => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {complaints.slice(0, 5).map((item) => (
+              {complaints.slice(0, 5).map((item, idx) => (
                 <div
                   key={item.id}
                   onClick={() => navigate(`/resident/complaints/${item.id}`)}
@@ -226,15 +251,18 @@ export const ResidentDashboard = () => {
                     borderRadius: '8px',
                     border: '1px solid #E7E7E9',
                     backgroundColor: '#FFFFFF',
-                    transition: 'all 0.15s ease'
+                    transition: 'background-color 0.15s, border-color 0.15s, transform 0.15s',
+                    animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.04}s both`
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#FAFAFA';
                     e.currentTarget.style.borderColor = '#D5D5D8';
+                    e.currentTarget.style.transform = 'translateY(-1.5px)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = '#FFFFFF';
                     e.currentTarget.style.borderColor = '#E7E7E9';
+                    e.currentTarget.style.transform = 'none';
                   }}
                 >
                   <div style={{ minWidth: 0 }}>

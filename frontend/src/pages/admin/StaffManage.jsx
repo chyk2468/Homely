@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Phone, Mail, RefreshCw, AlertCircle } from 'lucide-react';
+import { Plus, Phone, Mail, RefreshCw, AlertCircle, Check } from 'lucide-react';
 import { api } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
 import { Modal } from '../../components/Modal';
+import { SkeletonListRow } from '../../components/Skeleton';
+import { useToast } from '../../context/ToastContext';
 
 export const StaffManage = () => {
+  const toast = useToast();
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [createSuccess, setCreateSuccess] = useState(false);
   const [error, setError] = useState('');
 
   // New staff form
@@ -18,15 +23,20 @@ export const StaffManage = () => {
   const [specialization, setSpecialization] = useState('Plumbing');
   const [phone, setPhone] = useState('');
 
-  const fetchStaff = async () => {
-    setLoading(true);
+  const fetchStaff = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    else setLoading(true);
+
     try {
       const data = await api.getStaffList();
       setStaffList(data);
+      if (isManual) toast.success('Staff list refreshed', 'Latest technicians loaded.');
     } catch (err) {
       console.error('Failed to load staff list:', err);
+      if (isManual) toast.error('Refresh failed', 'Could not refresh staff list.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -47,16 +57,23 @@ export const StaffManage = () => {
         specialization: specialization.trim(),
         phone_number: phone.trim() || undefined
       });
-      setModalOpen(false);
-      setFullName('');
-      setEmail('');
-      setPassword('');
-      setPhone('');
-      fetchStaff();
-    } catch (err) {
-      setError(err.message || 'Failed to create staff account.');
-    } finally {
       setSaving(false);
+      setCreateSuccess(true);
+      toast.success('Staff onboarded', `Account created for ${fullName.trim()}.`);
+
+      setTimeout(() => {
+        setModalOpen(false);
+        setCreateSuccess(false);
+        setFullName('');
+        setEmail('');
+        setPassword('');
+        setPhone('');
+        fetchStaff();
+      }, 700);
+    } catch (err) {
+      setSaving(false);
+      setError(err.message || 'Failed to create staff account.');
+      toast.error('Onboarding error', err.message || 'Failed to create staff account.');
     }
   };
 
@@ -65,9 +82,10 @@ export const StaffManage = () => {
       await api.updateStaff(staffMember.id, {
         is_active: !staffMember.is_active
       });
+      toast.success('Status updated', `${staffMember.full_name} is now ${!staffMember.is_active ? 'Active' : 'Inactive'}.`);
       fetchStaff();
     } catch (err) {
-      alert(err.message || 'Failed to update staff status.');
+      toast.error('Action failed', err.message || 'Failed to update staff status.');
     }
   };
 
@@ -82,8 +100,12 @@ export const StaffManage = () => {
               <Plus size={14} />
               <span>Add Staff Member</span>
             </button>
-            <button onClick={fetchStaff} className="btn btn-secondary btn-sm" disabled={loading}>
-              <RefreshCw size={13} className={loading ? 'spin' : ''} />
+            <button
+              onClick={() => fetchStaff(true)}
+              className="btn btn-secondary btn-sm"
+              disabled={loading || refreshing}
+            >
+              <RefreshCw size={13} className={refreshing ? 'spin-once' : ''} />
             </button>
           </div>
         }
@@ -91,6 +113,7 @@ export const StaffManage = () => {
 
       <div className="page-body">
         <div
+          className="stagger-1"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -106,8 +129,9 @@ export const StaffManage = () => {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
-              Loading staff accounts...
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <SkeletonListRow />
+              <SkeletonListRow />
             </div>
           ) : staffList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#777777' }}>
@@ -115,7 +139,7 @@ export const StaffManage = () => {
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '14px' }}>
-              {staffList.map((st) => (
+              {staffList.map((st, idx) => (
                 <div
                   key={st.id}
                   style={{
@@ -123,7 +147,17 @@ export const StaffManage = () => {
                     borderRadius: '10px',
                     border: '1px solid #E7E7E9',
                     borderLeft: `4px solid ${st.is_active ? '#F04B4F' : '#D5D5D8'}`,
-                    backgroundColor: '#FFFFFF'
+                    backgroundColor: '#FFFFFF',
+                    transition: 'transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s',
+                    animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.04}s both`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1.5px)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.04)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
@@ -210,7 +244,8 @@ export const StaffManage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                marginBottom: '14px'
+                marginBottom: '14px',
+                animation: 'itemSlideUp 0.25s forwards'
               }}
             >
               <AlertCircle size={15} />
@@ -288,8 +323,17 @@ export const StaffManage = () => {
               <button type="button" onClick={() => setModalOpen(false)} className="btn btn-secondary">
                 Cancel
               </button>
-              <button type="submit" disabled={saving} className="btn btn-primary">
-                <span>{saving ? 'Creating...' : 'Create Account'}</span>
+              <button
+                type="submit"
+                disabled={saving || createSuccess}
+                className={`btn ${createSuccess ? 'btn-success' : 'btn-primary'}`}
+              >
+                {saving ? (
+                  <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                ) : createSuccess ? (
+                  <Check size={14} className="btn-checkmark-icon" />
+                ) : null}
+                <span>{saving ? 'Creating...' : createSuccess ? 'Created!' : 'Create Account'}</span>
               </button>
             </div>
           </form>

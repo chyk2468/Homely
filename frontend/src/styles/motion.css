@@ -1,0 +1,548 @@
+/* ==========================================================================
+   HOMELY GLOBAL MOTION DESIGN SYSTEM
+   Standard Motion Language: Linear + Stripe grade SaaS micro-interactions
+   ========================================================================== */
+
+:root {
+  /* Motion Duration & Easing Tiers */
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Micro Interactions (120ms – 220ms) */
+  --motion-micro-fast: 140ms var(--ease-spring);
+  --motion-micro: 180ms var(--ease-spring);
+  --motion-micro-slow: 220ms var(--ease-spring);
+
+  /* Component Transitions (220ms – 400ms) */
+  --motion-component: 300ms var(--ease-spring);
+  --motion-component-slow: 380ms var(--ease-spring);
+
+  /* Page Transitions (350ms – 600ms) */
+  --motion-page: 420ms var(--ease-spring);
+
+  /* Elevation Shadows */
+  --shadow-idle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-hover-card: 0 8px 24px -4px rgba(0, 0, 0, 0.07), 0 2px 6px rgba(0, 0, 0, 0.03);
+  --shadow-modal-depth: 0 24px 38px 3px rgba(0, 0, 0, 0.12), 0 9px 46px 8px rgba(0, 0, 0, 0.08);
+  --shadow-focus-ring: 0 0 0 3.5px rgba(240, 75, 79, 0.12);
+}
+
+/* --------------------------------------------------------------------------
+   1. Global Interactive Element Micro-Interactions
+   -------------------------------------------------------------------------- */
+
+/* Buttons */
+.btn {
+  transition: background-color var(--motion-micro),
+              border-color var(--motion-micro),
+              color var(--motion-micro),
+              transform var(--motion-micro),
+              box-shadow var(--motion-micro) !important;
+  will-change: transform;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 5px 15px rgba(240, 75, 79, 0.28);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Interactive Cards & Glass Panels */
+.glass-panel {
+  transition: transform var(--motion-component),
+              box-shadow var(--motion-component),
+              border-color var(--motion-micro) !important;
+  will-change: transform, box-shadow;
+}
+
+.glass-panel-interactive:hover,
+.interactive-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: var(--shadow-hover-card) !important;
+  border-color: var(--color-border-hover, #D5D5D8) !important;
+}
+
+/* Form Inputs & Selects Focus States */
+.input-field,
+.select-field,
+.textarea-field {
+  transition: border-color var(--motion-micro),
+              box-shadow var(--motion-micro),
+              background-color var(--motion-micro) !important;
+}
+
+.input-field:hover,
+.select-field:hover,
+.textarea-field:hover {
+  border-color: var(--color-border-hover, #D5D5D8);
+}
+
+.input-field:focus,
+.select-field:focus,
+.textarea-field:focus {
+  border-color: var(--color-primary, #F04B4F) !important;
+  box-shadow: var(--shadow-focus-ring) !important;
+  background-color: #FFFFFF !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Stagger & Entrance Keyframes
+   -------------------------------------------------------------------------- */
+
+@keyframes pageFadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemSlideRight {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scalePopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.page-enter {
+  animation: pageFadeInUp var(--motion-page) forwards;
+}
+
+/* Stagger Utilities */
+.stagger-1 { animation: itemSlideUp 0.45s var(--ease-spring) 0.04s both; }
+.stagger-2 { animation: itemSlideUp 0.45s var(--ease-spring) 0.08s both; }
+.stagger-3 { animation: itemSlideUp 0.45s var(--ease-spring) 0.12s both; }
+.stagger-4 { animation: itemSlideUp 0.45s var(--ease-spring) 0.16s both; }
+.stagger-5 { animation: itemSlideUp 0.45s var(--ease-spring) 0.20s both; }
+.stagger-6 { animation: itemSlideUp 0.45s var(--ease-spring) 0.24s both; }
+.stagger-7 { animation: itemSlideUp 0.45s var(--ease-spring) 0.28s both; }
+.stagger-8 { animation: itemSlideUp 0.45s var(--ease-spring) 0.32s both; }
+
+/* --------------------------------------------------------------------------
+   3. Sidebar Navigation Motion
+   -------------------------------------------------------------------------- */
+.sidebar-container {
+  animation: itemSlideRight 0.5s var(--ease-spring) forwards;
+}
+
+.nav-link-item {
+  position: relative;
+  transition: background-color var(--motion-micro),
+              color var(--motion-micro),
+              transform var(--motion-micro);
+}
+
+.nav-link-item .nav-icon {
+  transition: transform var(--motion-micro) ease, color var(--motion-micro) ease;
+}
+
+.nav-link-item .nav-text {
+  transition: transform var(--motion-micro) ease, color var(--motion-micro) ease;
+}
+
+.nav-link-item:hover:not(.active) .nav-icon {
+  transform: translateX(2px);
+}
+
+.nav-link-item:hover:not(.active) .nav-text {
+  transform: translateX(1.5px);
+}
+
+.nav-link-item.active {
+  background: var(--color-primary-soft, #FCECED) !important;
+  color: var(--color-primary, #F04B4F) !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Pulse & Critical Overdue Queue Indicators
+   -------------------------------------------------------------------------- */
+@keyframes overduePulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.overdue-pulse {
+  animation: overduePulse 2.5s ease-in-out infinite;
+}
+
+@keyframes softGlowBorder {
+  0% { border-color: #F9D0D2; }
+  50% { border-color: #F04B4F; }
+  100% { border-color: #F9D0D2; }
+}
+
+.overdue-border-pulse {
+  animation: softGlowBorder 3s ease-in-out infinite;
+}
+
+/* --------------------------------------------------------------------------
+   5. Notification Bell Wiggle & Badge Pop
+   -------------------------------------------------------------------------- */
+@keyframes bellWiggle {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-10deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-5deg); }
+  80% { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.bell-wiggle {
+  animation: bellWiggle 0.65s var(--ease-spring);
+}
+
+@keyframes badgePopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.badge-pop {
+  animation: badgePopIn 0.3s var(--ease-spring) forwards;
+}
+
+/* --------------------------------------------------------------------------
+   6. Single Controlled Spin for Refresh
+   -------------------------------------------------------------------------- */
+@keyframes rotateOnce {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spin-once {
+  animation: rotateOnce 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.spin-continuous {
+  animation: rotateOnce 0.75s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   7. KPI Icon Pulse on Counter Completion
+   -------------------------------------------------------------------------- */
+@keyframes kpiIconPulse {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.kpi-icon-pulse {
+  animation: kpiIconPulse 0.4s var(--ease-spring) forwards;
+}
+
+/* --------------------------------------------------------------------------
+   8. Modal Overlay & Pop Motion
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: overlayFadeIn 0.25s var(--ease-out) forwards;
+}
+
+.modal-overlay.modal-closing {
+  animation: overlayFadeOut 0.22s var(--ease-out) forwards;
+}
+
+@keyframes overlayFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes overlayFadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.modal-box {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid var(--color-border, #E7E7E9);
+  border-radius: 14px;
+  box-shadow: var(--shadow-modal-depth);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  animation: modalScaleIn 0.32s var(--ease-spring) forwards;
+  transform-origin: center center;
+}
+
+.modal-overlay.modal-closing .modal-box {
+  animation: modalScaleOut 0.22s var(--ease-spring) forwards;
+}
+
+@keyframes modalScaleIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalScaleOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. Shimmer Skeleton Loading
+   -------------------------------------------------------------------------- */
+@keyframes shimmerWave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #F3F3F5 0%,
+    #EBEBEF 50%,
+    #F3F3F5 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerWave 1.6s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   10. Global Toast Notification System
+   -------------------------------------------------------------------------- */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+  width: calc(100% - 48px);
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  background: #FFFFFF;
+  border: 1px solid var(--color-border, #E7E7E9);
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  animation: toastSlideIn 0.35s var(--ease-spring) forwards;
+}
+
+.toast-item.toast-exit {
+  animation: toastSlideOut 0.28s var(--ease-spring) forwards;
+}
+
+@keyframes toastSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(30px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(40px) scale(0.94);
+  }
+}
+
+.toast-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2.5px;
+  background: var(--color-primary, #F04B4F);
+  animation: toastProgress linear forwards;
+}
+
+@keyframes toastProgress {
+  0% { width: 100%; }
+  100% { width: 0%; }
+}
+
+/* --------------------------------------------------------------------------
+   11. Timeline & Discussion Motion
+   -------------------------------------------------------------------------- */
+@keyframes timelineLineDraw {
+  0% {
+    transform: scaleY(0);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.timeline-line {
+  transform-origin: top center;
+  animation: timelineLineDraw 0.6s var(--ease-spring) forwards;
+}
+
+.timeline-node {
+  animation: scalePopIn 0.35s var(--ease-spring) 0.15s both;
+}
+
+@keyframes messageSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-item-enter {
+  animation: messageSlideIn 0.3s var(--ease-spring) forwards;
+}
+
+/* --------------------------------------------------------------------------
+   12. Image Lightbox Zoom Motion
+   -------------------------------------------------------------------------- */
+.lightbox-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: overlayFadeIn 0.25s var(--ease-out) forwards;
+}
+
+.lightbox-content {
+  animation: modalScaleIn 0.32s var(--ease-spring) forwards;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+/* --------------------------------------------------------------------------
+   13. Reduced Motion Accessibility Overrides
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .overdue-pulse,
+  .overdue-border-pulse,
+  .bell-wiggle,
+  .spin-once,
+  .spin-continuous,
+  .skeleton-shimmer {
+    animation: none !important;
+  }
+
+  .btn:hover,
+  .glass-panel-interactive:hover,
+  .interactive-card:hover {
+    transform: none !important;
+  }
+}

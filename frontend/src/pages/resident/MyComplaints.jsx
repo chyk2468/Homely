@@ -12,6 +12,7 @@ import { Navbar } from '../../components/Navbar';
 import { StatusBadge } from '../../components/StatusBadge';
 import { PriorityBadge } from '../../components/PriorityBadge';
 import { SLACountdownBadge } from '../../components/SLACountdownBadge';
+import { SkeletonListRow } from '../../components/Skeleton';
 
 export const MyComplaints = () => {
   const navigate = useNavigate();
@@ -91,6 +92,7 @@ export const MyComplaints = () => {
       <div className="page-body">
         {/* Filter Controls Bar */}
         <div
+          className="stagger-1"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -157,11 +159,14 @@ export const MyComplaints = () => {
 
         {/* Complaints List */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: '#777777', fontSize: '13px' }}>
-            Loading complaints...
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <SkeletonListRow />
+            <SkeletonListRow />
+            <SkeletonListRow />
           </div>
         ) : complaints.length === 0 ? (
           <div
+            className="stagger-2"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
@@ -182,7 +187,7 @@ export const MyComplaints = () => {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {complaints.map((item) => {
+            {complaints.map((item, idx) => {
               const fullPhotoUrl = item.photo_url ? `${API_ROOT}${item.photo_url}` : null;
 
               return (
@@ -201,15 +206,18 @@ export const MyComplaints = () => {
                     border: '1px solid #E7E7E9',
                     backgroundColor: '#FFFFFF',
                     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
-                    transition: 'all 0.15s ease'
+                    transition: 'background-color 0.15s, border-color 0.15s, transform 0.15s',
+                    animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.03}s both`
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#FAFAFA';
                     e.currentTarget.style.borderColor = '#D5D5D8';
+                    e.currentTarget.style.transform = 'translateY(-1.5px)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = '#FFFFFF';
                     e.currentTarget.style.borderColor = '#E7E7E9';
+                    e.currentTarget.style.transform = 'none';
                   }}
                 >
                   <div style={{ display: 'flex', gap: '14px', alignItems: 'center', minWidth: 0, flex: 1 }}>

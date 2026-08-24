@@ -10,20 +10,23 @@ import {
   AlertCircle,
   Save,
   ShieldCheck,
-  Wrench
+  Wrench,
+  Check
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Navbar } from '../components/Navbar';
+import { useToast } from '../context/ToastContext';
 
 export const Profile = () => {
   const { user, updateProfile, isAdmin, isStaff, isResident } = useAuth();
+  const toast = useToast();
 
   // Profile Form
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [flatNumber, setFlatNumber] = useState('');
   const [profileSaving, setProfileSaving] = useState(false);
-  const [profileSuccess, setProfileSuccess] = useState('');
+  const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileError, setProfileError] = useState('');
 
   // Password Form
@@ -31,7 +34,7 @@ export const Profile = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordSaving, setPasswordSaving] = useState(false);
-  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
@@ -45,7 +48,7 @@ export const Profile = () => {
   const handleUpdateProfileDetails = async (e) => {
     e.preventDefault();
     setProfileError('');
-    setProfileSuccess('');
+    setProfileSuccess(false);
     setProfileSaving(true);
 
     try {
@@ -54,18 +57,21 @@ export const Profile = () => {
         phone_number: phone.trim() || null,
         flat_number: isResident ? (flatNumber.trim() || null) : undefined
       });
-      setProfileSuccess('Profile details saved successfully!');
-    } catch (err) {
-      setProfileError(err.message || 'Failed to update profile.');
-    } finally {
       setProfileSaving(false);
+      setProfileSuccess(true);
+      toast.success('Profile updated', 'Your personal details were saved successfully.');
+      setTimeout(() => setProfileSuccess(false), 2000);
+    } catch (err) {
+      setProfileSaving(false);
+      setProfileError(err.message || 'Failed to update profile.');
+      toast.error('Update failed', err.message || 'Could not save profile details.');
     }
   };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPasswordError('');
-    setPasswordSuccess('');
+    setPasswordSuccess(false);
 
     if (newPassword.length < 6) {
       setPasswordError('New password must be at least 6 characters long.');
@@ -84,14 +90,17 @@ export const Profile = () => {
         current_password: currentPassword,
         new_password: newPassword
       });
-      setPasswordSuccess('Password changed successfully!');
+      setPasswordSaving(false);
+      setPasswordSuccess(true);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      toast.success('Security updated', 'Your login password has been changed.');
+      setTimeout(() => setPasswordSuccess(false), 2000);
     } catch (err) {
-      setPasswordError(err.message || 'Failed to change password.');
-    } finally {
       setPasswordSaving(false);
+      setPasswordError(err.message || 'Failed to change password.');
+      toast.error('Password error', err.message || 'Failed to change password.');
     }
   };
 
@@ -105,6 +114,7 @@ export const Profile = () => {
       <div className="page-body" style={{ maxWidth: '960px' }}>
         {/* User Identity Header Card */}
         <div
+          className="stagger-1"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -132,7 +142,8 @@ export const Profile = () => {
                 color: '#F04B4F',
                 fontSize: '22px',
                 fontWeight: '700',
-                flexShrink: 0
+                flexShrink: 0,
+                boxShadow: '0 0 16px rgba(240, 75, 79, 0.2)'
               }}
             >
               {isAdmin ? <ShieldCheck size={28} /> : isStaff ? <Wrench size={28} /> : <User size={28} />}
@@ -173,6 +184,7 @@ export const Profile = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
           {/* Card 1: Personal Details */}
           <div
+            className="stagger-2"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
@@ -188,26 +200,6 @@ export const Profile = () => {
               </h3>
             </div>
 
-            {profileSuccess && (
-              <div
-                style={{
-                  background: '#EAF7F0',
-                  border: '1px solid #C4EDD6',
-                  borderRadius: '8px',
-                  padding: '10px 12px',
-                  color: '#15803D',
-                  fontSize: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  marginBottom: '14px'
-                }}
-              >
-                <CheckCircle2 size={15} />
-                <div>{profileSuccess}</div>
-              </div>
-            )}
-
             {profileError && (
               <div
                 style={{
@@ -220,7 +212,8 @@ export const Profile = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  marginBottom: '14px'
+                  marginBottom: '14px',
+                  animation: 'itemSlideUp 0.25s forwards'
                 }}
               >
                 <AlertCircle size={15} />
@@ -288,12 +281,18 @@ export const Profile = () => {
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
                 <button
                   type="submit"
-                  disabled={profileSaving}
-                  className="btn btn-primary"
+                  disabled={profileSaving || profileSuccess}
+                  className={`btn ${profileSuccess ? 'btn-success' : 'btn-primary'}`}
                   style={{ padding: '9px 18px', fontSize: '13px' }}
                 >
-                  <Save size={14} />
-                  <span>{profileSaving ? 'Saving...' : 'Save Profile Details'}</span>
+                  {profileSaving ? (
+                    <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                  ) : profileSuccess ? (
+                    <Check size={14} className="btn-checkmark-icon" />
+                  ) : (
+                    <Save size={14} />
+                  )}
+                  <span>{profileSaving ? 'Saving...' : profileSuccess ? 'Saved' : 'Save Profile Details'}</span>
                 </button>
               </div>
             </form>
@@ -301,6 +300,7 @@ export const Profile = () => {
 
           {/* Card 2: Security & Password */}
           <div
+            className="stagger-3"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
@@ -316,26 +316,6 @@ export const Profile = () => {
               </h3>
             </div>
 
-            {passwordSuccess && (
-              <div
-                style={{
-                  background: '#EAF7F0',
-                  border: '1px solid #C4EDD6',
-                  borderRadius: '8px',
-                  padding: '10px 12px',
-                  color: '#15803D',
-                  fontSize: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  marginBottom: '14px'
-                }}
-              >
-                <CheckCircle2 size={15} />
-                <div>{passwordSuccess}</div>
-              </div>
-            )}
-
             {passwordError && (
               <div
                 style={{
@@ -348,7 +328,8 @@ export const Profile = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  marginBottom: '14px'
+                  marginBottom: '14px',
+                  animation: 'itemSlideUp 0.25s forwards'
                 }}
               >
                 <AlertCircle size={15} />
@@ -398,12 +379,18 @@ export const Profile = () => {
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
                 <button
                   type="submit"
-                  disabled={passwordSaving}
-                  className="btn btn-primary"
+                  disabled={passwordSaving || passwordSuccess}
+                  className={`btn ${passwordSuccess ? 'btn-success' : 'btn-primary'}`}
                   style={{ padding: '9px 18px', fontSize: '13px' }}
                 >
-                  <Shield size={14} />
-                  <span>{passwordSaving ? 'Updating...' : 'Update Password'}</span>
+                  {passwordSaving ? (
+                    <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                  ) : passwordSuccess ? (
+                    <Check size={14} className="btn-checkmark-icon" />
+                  ) : (
+                    <Shield size={14} />
+                  )}
+                  <span>{passwordSaving ? 'Updating...' : passwordSuccess ? 'Updated!' : 'Update Password'}</span>
                 </button>
               </div>
             </form>

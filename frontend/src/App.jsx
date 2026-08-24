@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Public & Shared Pages
@@ -40,50 +41,52 @@ const RootRedirect = () => {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Root Redirect */}
-          <Route path="/" element={<RootRedirect />} />
+            {/* Root Redirect */}
+            <Route path="/" element={<RootRedirect />} />
 
-          {/* Resident Routes */}
-          <Route element={<ProtectedRoute requiredRole="resident" />}>
-            <Route path="/resident/dashboard" element={<ResidentDashboard />} />
-            <Route path="/resident/new-complaint" element={<NewComplaint />} />
-            <Route path="/resident/my-complaints" element={<MyComplaints />} />
-            <Route path="/resident/complaints/:id" element={<ResidentComplaintDetail />} />
-          </Route>
+            {/* Resident Routes */}
+            <Route element={<ProtectedRoute requiredRole="resident" />}>
+              <Route path="/resident/dashboard" element={<ResidentDashboard />} />
+              <Route path="/resident/new-complaint" element={<NewComplaint />} />
+              <Route path="/resident/my-complaints" element={<MyComplaints />} />
+              <Route path="/resident/complaints/:id" element={<ResidentComplaintDetail />} />
+            </Route>
 
-          {/* Staff Routes */}
-          <Route element={<ProtectedRoute requiredRole="staff" />}>
-            <Route path="/staff/dashboard" element={<StaffDashboard />} />
-            <Route path="/staff/my-assigned" element={<StaffComplaints />} />
-          </Route>
+            {/* Staff Routes */}
+            <Route element={<ProtectedRoute requiredRole="staff" />}>
+              <Route path="/staff/dashboard" element={<StaffDashboard />} />
+              <Route path="/staff/my-assigned" element={<StaffComplaints />} />
+            </Route>
 
-          {/* Admin Routes */}
-          <Route element={<ProtectedRoute requiredRole="admin" />}>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/complaints" element={<AllComplaints />} />
-            <Route path="/admin/notices" element={<NoticeManage />} />
-            <Route path="/admin/staff" element={<StaffManage />} />
-            <Route path="/admin/categories" element={<CategorySlaManage />} />
-            <Route path="/admin/audit-logs" element={<AuditLogs />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-          </Route>
+            {/* Admin Routes */}
+            <Route element={<ProtectedRoute requiredRole="admin" />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/complaints" element={<AllComplaints />} />
+              <Route path="/admin/notices" element={<NoticeManage />} />
+              <Route path="/admin/staff" element={<StaffManage />} />
+              <Route path="/admin/categories" element={<CategorySlaManage />} />
+              <Route path="/admin/audit-logs" element={<AuditLogs />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
+            </Route>
 
-          {/* Shared Authenticated Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/notices" element={<NoticeBoard />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
+            {/* Shared Authenticated Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/notices" element={<NoticeBoard />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

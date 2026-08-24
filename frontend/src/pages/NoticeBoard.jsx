@@ -2,22 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Pin, Calendar, User, RefreshCw } from 'lucide-react';
 import { api } from '../api/client';
 import { Navbar } from '../components/Navbar';
+import { SkeletonListRow } from '../components/Skeleton';
+import { useToast } from '../context/ToastContext';
 
 export const NoticeBoard = () => {
+  const toast = useToast();
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchNotices = async () => {
-    setLoading(true);
+  const fetchNotices = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    else setLoading(true);
     setError('');
+
     try {
       const data = await api.getNotices();
       setNotices(data);
+      if (isManual) {
+        toast.success('Notice board updated', 'Retrieved latest announcements.');
+      }
     } catch {
       setError('Failed to load notices.');
+      if (isManual) toast.error('Refresh error', 'Failed to retrieve notices.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -44,9 +55,13 @@ export const NoticeBoard = () => {
         title="Society Notice Board"
         subtitle="Official updates, maintenance schedules, and important announcements"
         extraAction={
-          <button onClick={fetchNotices} className="btn btn-secondary btn-sm" disabled={loading}>
-            <RefreshCw size={13} className={loading ? 'spin' : ''} />
-            <span>Refresh</span>
+          <button
+            onClick={() => fetchNotices(true)}
+            className="btn btn-secondary btn-sm"
+            disabled={loading || refreshing}
+          >
+            <RefreshCw size={13} className={refreshing ? 'spin-once' : ''} />
+            <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
         }
       />
@@ -61,7 +76,8 @@ export const NoticeBoard = () => {
               padding: '10px 14px',
               color: '#F04B4F',
               marginBottom: '16px',
-              fontSize: '13px'
+              fontSize: '13px',
+              animation: 'itemSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards'
             }}
           >
             {error}
@@ -69,11 +85,14 @@ export const NoticeBoard = () => {
         )}
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
-            Loading announcements...
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <SkeletonListRow />
+            <SkeletonListRow />
+            <SkeletonListRow />
           </div>
         ) : notices.length === 0 ? (
           <div
+            className="stagger-1"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
@@ -90,7 +109,7 @@ export const NoticeBoard = () => {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {notices.map((notice) => (
+            {notices.map((notice, idx) => (
               <div
                 key={notice.id}
                 style={{
@@ -99,7 +118,17 @@ export const NoticeBoard = () => {
                   border: notice.is_important ? '1px solid #F9D0D2' : '1px solid #E7E7E9',
                   borderLeft: notice.is_important ? '4px solid #F04B4F' : '1px solid #E7E7E9',
                   backgroundColor: notice.is_important ? '#FCECED' : '#FFFFFF',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+                  transition: 'transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s',
+                  animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.04}s both`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1.5px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.04)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.03)';
                 }}
               >
                 {/* Header row */}
@@ -107,6 +136,7 @@ export const NoticeBoard = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     {notice.is_important && (
                       <span
+                        className="overdue-pulse"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',

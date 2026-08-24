@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Wrench, RefreshCw, Phone } from 'lucide-react';
+import { Search, Wrench, RefreshCw, Phone, Check } from 'lucide-react';
 import { api, API_ROOT } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
 import { StatusBadge } from '../../components/StatusBadge';
@@ -8,11 +8,15 @@ import { PriorityBadge } from '../../components/PriorityBadge';
 import { SLACountdownBadge } from '../../components/SLACountdownBadge';
 import { Modal } from '../../components/Modal';
 import { CommentsThread } from '../../components/CommentsThread';
+import { SkeletonListRow } from '../../components/Skeleton';
+import { useToast } from '../../context/ToastContext';
 
 export const StaffComplaints = () => {
   const [searchParams] = useSearchParams();
+  const toast = useToast();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
@@ -25,9 +29,12 @@ export const StaffComplaints = () => {
   const [newStatus, setNewStatus] = useState('');
   const [actionNote, setActionNote] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
 
-  const fetchAssigned = async () => {
-    setLoading(true);
+  const fetchAssigned = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    else setLoading(true);
+
     try {
       const params = {};
       if (statusFilter) params.status = statusFilter;
@@ -37,10 +44,15 @@ export const StaffComplaints = () => {
 
       const data = await api.getStaffComplaints(params);
       setComplaints(data);
+      if (isManual) {
+        toast.success('Queue refreshed', 'Fetched matching assigned tickets.');
+      }
     } catch (err) {
       console.error('Failed to load assigned complaints:', err);
+      if (isManual) toast.error('Refresh failed', 'Could not load assigned tickets.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -59,8 +71,9 @@ export const StaffComplaints = () => {
       setSelectedComplaint(detail);
       setNewStatus(detail.status);
       setActionNote('');
+      setUpdateSuccess(false);
     } catch {
-      alert('Failed to load complaint details.');
+      toast.error('Load failed', 'Could not load complaint details.');
     }
   };
 
@@ -71,12 +84,17 @@ export const StaffComplaints = () => {
 
     try {
       await api.updateStaffComplaintStatus(selectedComplaint.id, newStatus, actionNote);
-      setSelectedComplaint(null);
-      fetchAssigned();
-    } catch (err) {
-      alert(err.message || 'Failed to update ticket status.');
-    } finally {
       setUpdating(false);
+      setUpdateSuccess(true);
+      toast.success('Ticket updated', `Complaint #${selectedComplaint.id} set to "${newStatus}".`);
+
+      setTimeout(() => {
+        setSelectedComplaint(null);
+        fetchAssigned();
+      }, 700);
+    } catch (err) {
+      setUpdating(false);
+      toast.error('Update failed', err.message || 'Failed to update ticket status.');
     }
   };
 
@@ -97,9 +115,13 @@ export const StaffComplaints = () => {
         title="Assigned Complaints Queue"
         subtitle="Manage your maintenance assignments, update progress, and resolve work orders"
         extraAction={
-          <button onClick={fetchAssigned} className="btn btn-secondary btn-sm" disabled={loading}>
-            <RefreshCw size={13} className={loading ? 'spin' : ''} />
-            <span>Refresh</span>
+          <button
+            onClick={() => fetchAssigned(true)}
+            className="btn btn-secondary btn-sm"
+            disabled={loading || refreshing}
+          >
+            <RefreshCw size={13} className={refreshing ? 'spin-once' : ''} />
+            <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
         }
       />
@@ -107,6 +129,7 @@ export const StaffComplaints = () => {
       <div className="page-body">
         {/* Filter Bar */}
         <div
+          className="stagger-1"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -192,6 +215,7 @@ export const StaffComplaints = () => {
 
         {/* Complaints Table / List */}
         <div
+          className="stagger-2"
           style={{
             backgroundColor: '#FFFFFF',
             border: '1px solid #E7E7E9',
@@ -207,11 +231,13 @@ export const StaffComplaints = () => {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
-              Filtering assigned complaints...
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <SkeletonListRow />
+              <SkeletonListRow />
+              <SkeletonListRow />
             </div>
           ) : complaints.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px', animation: 'scalePopIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
               <Wrench size={36} color="#A0A0A0" style={{ margin: '0 auto 10px' }} />
               <h3 style={{ fontSize: '15px', color: '#222222', marginBottom: '4px' }}>
                 No Matching Complaints
@@ -222,7 +248,7 @@ export const StaffComplaints = () => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {complaints.map((c) => (
+              {complaints.map((c, idx) => (
                 <div
                   key={c.id}
                   style={{
@@ -235,13 +261,18 @@ export const StaffComplaints = () => {
                     border: '1px solid #E7E7E9',
                     borderLeft: c.is_overdue && c.status !== 'Resolved' ? '4px solid #F04B4F' : '1px solid #E7E7E9',
                     backgroundColor: '#FFFFFF',
-                    transition: 'all 0.15s ease'
+                    transition: 'background-color 0.15s, border-color 0.15s, transform 0.15s',
+                    animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.03}s both`
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#FAFAFA';
+                    e.currentTarget.style.borderColor = '#D5D5D8';
+                    e.currentTarget.style.transform = 'translateY(-1.5px)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = '#FFFFFF';
+                    e.currentTarget.style.borderColor = '#E7E7E9';
+                    e.currentTarget.style.transform = 'none';
                   }}
                 >
                   <div style={{ minWidth: 0, flex: 1 }}>
@@ -367,7 +398,16 @@ export const StaffComplaints = () => {
                         height: '70px',
                         borderRadius: '6px',
                         overflow: 'hidden',
-                        border: '1px solid #E7E7E9'
+                        border: '1px solid #E7E7E9',
+                        transition: 'transform 0.18s, box-shadow 0.18s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.04)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'none';
+                        e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
                       <img
@@ -411,8 +451,17 @@ export const StaffComplaints = () => {
                 <button type="button" onClick={() => setSelectedComplaint(null)} className="btn btn-secondary">
                   Close
                 </button>
-                <button type="submit" disabled={updating} className="btn btn-primary">
-                  <span>{updating ? 'Saving...' : 'Save Status Update'}</span>
+                <button
+                  type="submit"
+                  disabled={updating || updateSuccess}
+                  className={`btn ${updateSuccess ? 'btn-success' : 'btn-primary'}`}
+                >
+                  {updating ? (
+                    <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                  ) : updateSuccess ? (
+                    <Check size={14} className="btn-checkmark-icon" />
+                  ) : null}
+                  <span>{updating ? 'Saving...' : updateSuccess ? 'Saved' : 'Save Status Update'}</span>
                 </button>
               </div>
             </form>

@@ -1,51 +1,58 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { X } from 'lucide-react';
 
 export const Modal = ({ isOpen, onClose, title, children, maxWidth = '550px' }) => {
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsRendered(true);
+      setIsClosing(false);
+    } else if (isRendered && !isClosing) {
+      setIsClosing(true);
+      timerRef.current = setTimeout(() => {
+        setIsRendered(false);
+        setIsClosing(false);
+      }, 220);
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
+      if (e.key === 'Escape' && isRendered && !isClosing) {
+        handleClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isRendered, isClosing]);
 
-  if (!isOpen) return null;
+  const handleClose = () => {
+    setIsClosing(true);
+    timerRef.current = setTimeout(() => {
+      setIsRendered(false);
+      setIsClosing(false);
+      onClose();
+    }, 220);
+  };
+
+  if (!isRendered) return null;
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-        backdropFilter: 'blur(4px)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px'
-      }}
-      onClick={onClose}
+      className={`modal-overlay ${isClosing ? 'modal-closing' : ''}`}
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
     >
       <div
-        style={{
-          width: '100%',
-          maxWidth,
-          background: '#FFFFFF',
-          border: '1px solid #E7E7E9',
-          borderRadius: '12px',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          maxHeight: '90vh',
-          animation: 'modalSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}
+        className="modal-box"
+        style={{ maxWidth }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -61,16 +68,27 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = '550px' }) 
         >
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#222222' }}>{title}</h3>
           <button
-            onClick={onClose}
+            onClick={handleClose}
+            className="btn-icon"
             style={{
               background: 'transparent',
               border: 'none',
               color: '#777777',
               cursor: 'pointer',
               display: 'flex',
-              padding: '4px',
-              borderRadius: '6px'
+              padding: '6px',
+              borderRadius: '6px',
+              transition: 'background-color 0.15s, color 0.15s'
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#F7F7F8';
+              e.currentTarget.style.color = '#222222';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#777777';
+            }}
+            aria-label="Close modal"
           >
             <X size={18} />
           </button>
@@ -81,12 +99,6 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = '550px' }) 
           {children}
         </div>
       </div>
-      <style>{`
-        @keyframes modalSlideUp {
-          from { opacity: 0; transform: translateY(12px) scale(0.98); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-      `}</style>
     </div>
   );
 };

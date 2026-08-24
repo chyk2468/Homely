@@ -8,18 +8,20 @@ import {
   Calendar,
   User,
   AlertCircle,
-  CheckCircle2,
-  Send
+  Send,
+  Check
 } from 'lucide-react';
 import { api } from '../../api/client';
 import { Navbar } from '../../components/Navbar';
 import { Modal } from '../../components/Modal';
+import { SkeletonListRow } from '../../components/Skeleton';
+import { useToast } from '../../context/ToastContext';
 
 export const NoticeManage = () => {
+  const toast = useToast();
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   // Create Form State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -27,9 +29,11 @@ export const NoticeManage = () => {
   const [content, setContent] = useState('');
   const [isImportant, setIsImportant] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [createSuccess, setCreateSuccess] = useState(false);
 
   // Edit Form State
   const [editingNotice, setEditingNotice] = useState(null);
+  const [editSuccess, setEditSuccess] = useState(false);
 
   const fetchNotices = async () => {
     setLoading(true);
@@ -50,7 +54,6 @@ export const NoticeManage = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     setSubmitting(true);
 
     try {
@@ -59,20 +62,25 @@ export const NoticeManage = () => {
         content: content.trim(),
         is_important: isImportant
       });
-      setSuccess(
-        isImportant
-          ? 'Notice published and broadcast notification dispatched to residents!'
-          : 'Notice published successfully.'
-      );
-      setTitle('');
-      setContent('');
-      setIsImportant(false);
-      setShowCreateModal(false);
-      fetchNotices();
-    } catch (err) {
-      setError(err.message || 'Failed to publish notice.');
-    } finally {
       setSubmitting(false);
+      setCreateSuccess(true);
+      toast.success(
+        'Notice published',
+        isImportant ? 'Pinned notice and broadcast notification dispatched!' : 'Notice is live on society board.'
+      );
+
+      setTimeout(() => {
+        setTitle('');
+        setContent('');
+        setIsImportant(false);
+        setShowCreateModal(false);
+        setCreateSuccess(false);
+        fetchNotices();
+      }, 700);
+    } catch (err) {
+      setSubmitting(false);
+      setError(err.message || 'Failed to publish notice.');
+      toast.error('Publish error', err.message || 'Failed to publish notice.');
     }
   };
 
@@ -87,13 +95,19 @@ export const NoticeManage = () => {
         content: editingNotice.content.trim(),
         is_important: editingNotice.is_important
       });
-      setEditingNotice(null);
-      setSuccess('Notice updated successfully.');
-      fetchNotices();
-    } catch (err) {
-      setError(err.message || 'Failed to update notice.');
-    } finally {
       setSubmitting(false);
+      setEditSuccess(true);
+      toast.success('Notice updated', 'Changes have been saved to notice board.');
+
+      setTimeout(() => {
+        setEditingNotice(null);
+        setEditSuccess(false);
+        fetchNotices();
+      }, 700);
+    } catch (err) {
+      setSubmitting(false);
+      setError(err.message || 'Failed to update notice.');
+      toast.error('Update failed', err.message || 'Failed to update notice.');
     }
   };
 
@@ -101,10 +115,10 @@ export const NoticeManage = () => {
     if (!window.confirm('Are you sure you want to delete this notice announcement?')) return;
     try {
       await api.deleteNotice(id);
-      setSuccess('Notice deleted.');
+      toast.success('Notice removed', 'Announcement deleted from board.');
       fetchNotices();
     } catch {
-      setError('Failed to delete notice.');
+      toast.error('Delete error', 'Failed to delete notice.');
     }
   };
 
@@ -134,26 +148,6 @@ export const NoticeManage = () => {
       />
 
       <div className="page-body">
-        {success && (
-          <div
-            style={{
-              background: '#EAF7F0',
-              border: '1px solid #C4EDD6',
-              borderRadius: '8px',
-              padding: '10px 14px',
-              color: '#15803D',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '16px'
-            }}
-          >
-            <CheckCircle2 size={16} />
-            <div>{success}</div>
-          </div>
-        )}
-
         {error && (
           <div
             style={{
@@ -166,7 +160,8 @@ export const NoticeManage = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              marginBottom: '16px'
+              marginBottom: '16px',
+              animation: 'itemSlideUp 0.25s forwards'
             }}
           >
             <AlertCircle size={16} />
@@ -176,11 +171,13 @@ export const NoticeManage = () => {
 
         {/* Notices List */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: '#777777', fontSize: '13px' }}>
-            Loading announcements...
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <SkeletonListRow />
+            <SkeletonListRow />
           </div>
         ) : notices.length === 0 ? (
           <div
+            className="stagger-1"
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid #E7E7E9',
@@ -201,7 +198,7 @@ export const NoticeManage = () => {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {notices.map((notice) => (
+            {notices.map((notice, idx) => (
               <div
                 key={notice.id}
                 style={{
@@ -210,13 +207,24 @@ export const NoticeManage = () => {
                   border: notice.is_important ? '1px solid #F9D0D2' : '1px solid #E7E7E9',
                   borderLeft: notice.is_important ? '4px solid #F04B4F' : '1px solid #E7E7E9',
                   backgroundColor: notice.is_important ? '#FCECED' : '#FFFFFF',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+                  transition: 'transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s',
+                  animation: `itemSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.04}s both`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1.5px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.04)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.03)';
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     {notice.is_important && (
                       <span
+                        className="overdue-pulse"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -358,11 +366,17 @@ export const NoticeManage = () => {
               </button>
               <button
                 type="submit"
-                disabled={submitting}
-                className="btn btn-primary"
+                disabled={submitting || createSuccess}
+                className={`btn ${createSuccess ? 'btn-success' : 'btn-primary'}`}
               >
-                <Send size={14} />
-                <span>{submitting ? 'Publishing...' : 'Publish'}</span>
+                {submitting ? (
+                  <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                ) : createSuccess ? (
+                  <Check size={14} className="btn-checkmark-icon" />
+                ) : (
+                  <Send size={14} />
+                )}
+                <span>{submitting ? 'Publishing...' : createSuccess ? 'Published!' : 'Publish'}</span>
               </button>
             </div>
           </form>
@@ -437,10 +451,15 @@ export const NoticeManage = () => {
               </button>
               <button
                 type="submit"
-                disabled={submitting}
-                className="btn btn-primary"
+                disabled={submitting || editSuccess}
+                className={`btn ${editSuccess ? 'btn-success' : 'btn-primary'}`}
               >
-                <span>{submitting ? 'Saving...' : 'Save Changes'}</span>
+                {submitting ? (
+                  <span className="btn-spinner" style={{ width: '13px', height: '13px' }} />
+                ) : editSuccess ? (
+                  <Check size={14} className="btn-checkmark-icon" />
+                ) : null}
+                <span>{submitting ? 'Saving...' : editSuccess ? 'Saved!' : 'Save Changes'}</span>
               </button>
             </div>
           </form>
