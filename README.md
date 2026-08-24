@@ -67,7 +67,101 @@ Apartment societies process continuous streams of resident maintenance complaint
 
 ---
 
-## 📐 4. System Design & Architectural Write-Up (Max 800 Words)
+## 📸 4. Application UI Walkthrough & Visual Explanations
+
+Here is a sorted visual tour of Homely's core user journeys across **Society Administrators**, **Residents**, and **Maintenance Staff Technicians**.
+
+---
+
+### 1. 📊 Executive Operations Dashboard & Smart Analytics
+> **Primary Audience:** Society Administrators & Facility Managers
+
+![Admin Dashboard & Smart Analytics](Images/01_admin_dashboard.png)
+
+* **Key Highlights & Capabilities:**
+  * **Real-Time Workload Metrics:** Live counter cards tracking **Total Complaints** (`5`), **Open Tickets** (`3` awaiting action), **In Progress** (`1` under active repair), and **Resolved** (`1` closed).
+  * **SLA & Performance Analytics:** High-level KPIs measuring **Average Resolution Time** (`72 hrs`), **Resolution Rate** (`20%`), **Overdue Rate** (`20%`), and overall **Resident Satisfaction Score** (`5.0 / 5.0`).
+  * **Critical Overdue Queue:** Automatic escalation alert card highlighting complaints that have breached their category SLA resolution windows (e.g. *Severe pipe leakage under kitchen sink — Overdue by 7d 0h*).
+  * **Staff Workload Allocation:** Real-time visibility into active work orders assigned across specialized trades (Plumbing, Electrical, Sanitation).
+  * **Category Frequency & Live Activity Stream:** Distribution of issues across society infrastructure and instant feeds of latest registrations.
+
+---
+
+### 2. 📋 Complaints Registry & Advanced Multi-Criteria Search
+> **Primary Audience:** Society Administrators
+
+![All Complaints Registry](Images/02_complaints_registry.png)
+
+* **Key Highlights & Capabilities:**
+  * **Unified Complaint Registry:** Central administrative ledger displaying all resident tickets across society wings.
+  * **Multi-Parameter Filter Engine:** Granular filtering by **Search Keyword** (Ticket ID, Title, Resident name), **Category** (Plumbing, Electrical, Elevator, Pest Control, Civil), **Status** (`Open`, `In Progress`, `Resolved`), **Priority** (`Low`, `Medium`, `High`), and **SLA Compliance** (`All`, `Within SLA`, `Overdue`).
+  * **Live SLA Countdown Badges:** Contextual badges displaying dynamic time remaining before deadline expiration (e.g. `2d 23h left`, `Due in 23h 45m`) and immediate alert styling for overdue items (`Overdue by 7d 0h`).
+  * **One-Click CSV Export:** Authenticated export button to generate CSV reports for society committee audits and monthly maintenance reviews.
+
+---
+
+### 3. ⚡ Technician Dispatch & Complaint Management Modal
+> **Primary Audience:** Society Administrators
+
+![Manage Complaint Modal](Images/03_manage_complaint_modal.png)
+
+* **Key Highlights & Capabilities:**
+  * **Quick-Action Dispatch Interface:** Seamlessly update complaint lifecycle status, re-evaluate priority level, and assign specialized in-house staff or external vendors.
+  * **Contextual Resident & SLA Overview:** Instant visibility into resident identity, unit/flat number, contact details, and applicable category resolution SLA target.
+  * **Attachment Inspection:** Embedded thumbnail preview of resident-submitted photo evidence.
+  * **Audited Action Remarks:** Administrative notes field that logs custom remarks directly to the immutable history timeline upon status or assignment modification.
+  * **Tabbed Deep-Dive:** Instant tabs to switch between *Ticket & Actions*, *Timeline History*, and *Discussion Thread*.
+
+---
+
+### 4. 🔍 Resident Ticket View, Photo Evidence & Audited Progress Timeline
+> **Primary Audience:** Residents, Maintenance Staff & Administrators
+
+![Complaint Detail & Lifecycle Timeline](Images/04_complaint_detail_timeline.png)
+
+* **Key Highlights & Capabilities:**
+  * **Structured Two-Column Ticket View:** Left column houses the comprehensive problem description, high-resolution photo evidence gallery with expandable modal preview, and interactive conversation thread.
+  * **Live SLA Target Tracker:** Right column displays real-time countdown timer, priority badge, and current technician assignment status.
+  * **Two-Way Discussion Messaging:** Built-in communication channel allowing residents and maintenance staff to coordinate visit timings, gate clearances, and troubleshooting notes.
+  * **Immutable Progress Timeline:** Step-by-step chronological audit trail recording exact timestamps, state transitions (`Created` ➔ `In Progress` ➔ `Resolved`), and actor attributions.
+
+---
+
+### 5. 🛠️ Maintenance Staff Management & Trade Roster
+> **Primary Audience:** Society Administrators
+
+![Maintenance Staff Management](Images/05_staff_management.png)
+
+* **Key Highlights & Capabilities:**
+  * **Technician Directory:** Overview of all registered society technicians categorized by trade specializations (Plumbing, Electrical, Cleaning & Sanitation).
+  * **Contact & Dispatch Availability:** Direct display of technician email addresses, phone contact numbers, and real-time active status badges.
+  * **Staff Controls:** One-click account activation/deactivation and a `+ Add Staff Member` modal for fast technician onboarding.
+
+---
+
+### 6. 👤 Resident Account & Security Settings
+> **Primary Audience:** Residents
+
+![Resident Profile & Settings](Images/06_resident_profile.png)
+
+* **Key Highlights & Capabilities:**
+  * **Personal Profile Management:** Resident self-service portal to update Full Name, Flat/Unit Number, and Phone Number.
+  * **Login Credentials & Password Security:** Secure self-service password update form with client-side and server-side validation.
+
+---
+
+### 7. 🛡️ Administrator Profile & Management Office Settings
+> **Primary Audience:** Society Administrators
+
+![Admin Profile & Settings](Images/07_admin_profile.png)
+
+* **Key Highlights & Capabilities:**
+  * **Role Verification:** Dedicated administrative profile badge (`SOCIETY ADMINISTRATOR`) confirming privileged access.
+  * **Management Office Details:** Update official society administration contact numbers and office credentials.
+
+---
+
+## 📐 5. System Design & Architectural Write-Up (Max 800 Words)
 
 ### A. Complaint Lifecycle & Immutable History Model
 Every complaint follows a strict state transition model: `Open` ➔ `In Progress` ➔ `Resolved` (with optional `Reopened` state).
@@ -96,7 +190,7 @@ The system incorporates a multi-tier notification pipeline:
 
 ---
 
-## 🗄️ 5. Database Schema
+## 🗄️ 6. Database Schema
 
 The SQLite/PostgreSQL schema is normalized across 10 relational models:
 
@@ -213,7 +307,7 @@ erDiagram
 
 ---
 
-## 📡 6. Complete REST API Reference
+## 📡 7. Complete REST API Reference
 
 ### 🔐 Authentication & Profile (`/api/auth`)
 | Method | Endpoint | Access | Description |
@@ -274,7 +368,7 @@ erDiagram
 
 ---
 
-## 💻 7. Installation & Local Setup Guide
+## 💻 8. Installation & Local Setup Guide
 
 ### Prerequisites
 - **Python:** 3.10 or higher
@@ -333,7 +427,7 @@ npm run dev
 
 ---
 
-## ⚙️ 8. Environment Variables (`.env.example`)
+## ⚙️ 9. Environment Variables (`.env.example`)
 
 Create a `.env` file in `backend/` with the following variables:
 
@@ -364,7 +458,7 @@ FROM_EMAIL="Homely Notifications <notifications@society.com>"
 
 ---
 
-## 🧪 9. Automated Testing Suite
+## 🧪 10. Automated Testing Suite
 
 Homely includes automated unit and integration tests covering the complete complaint lifecycle, RBAC data isolation, SLA overdue calculations, duplicate detection, staff assignments, reopen workflows, and profile security:
 
@@ -397,7 +491,7 @@ pytest tests/ -v
 
 ---
 
-## ☁️ 10. Production Deployment (Vercel & Render)
+## ☁️ 11. Production Deployment (Vercel & Render)
 
 ### 🚀 Live Deployment
 - **Frontend App (Vercel):** [https://frontend-tau-eight-14.vercel.app/login](https://frontend-tau-eight-14.vercel.app/login)
