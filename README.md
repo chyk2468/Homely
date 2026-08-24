@@ -175,9 +175,17 @@ To guarantee accountability, complaints maintain a strict 1-to-many relationship
 
 ### B. Dynamic SLA & Overdue Detection Engine
 Deadlines are calculated using category-specific SLAs (`complaint_categories.sla_days`) or the global society threshold (`settings.overdue_threshold_days`). Upon creation:
-$$\text{Deadline} = \text{created\_at} + \text{SLA Days}$$
-The system evaluates overdue status both on dynamic query execution and on administrator configuration updates:
-$$\text{is\_overdue} = (\text{status} \neq \text{'Resolved'}) \land (\text{utcnow}() > \text{Deadline})$$
+
+```text
+Deadline = created_at + (Category SLA Days × 24 Hours)
+```
+
+The system evaluates overdue status dynamically on query execution and administrator updates:
+
+```text
+is_overdue = (status != "Resolved") AND (utcnow() > Deadline)
+```
+
 Overdue complaints are assigned priority in search queries and surfaced at the top of admin/staff dashboards with soft coral alert badges (`#FCECED` / `#F04B4F`).
 
 ### C. Photo Upload & Media Handling

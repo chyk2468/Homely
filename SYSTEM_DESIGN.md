@@ -62,16 +62,18 @@ stateDiagram-v2
 
 Each complaint category has a configured SLA resolution window stored in `complaint_categories` (fallback to global `settings.overdue_threshold_days` or default 7 days):
 
-$$\text{Deadline} = \text{created\_at} + (\text{Category SLA Days} \times 86,400\text{s})$$
+```text
+Deadline = created_at + (Category SLA Days × 86,400s)
 
-$$\text{Remaining Seconds} = \text{Deadline} - \text{Current UTC Time}$$
+Remaining Seconds = Deadline - Current UTC Time
 
-$$\text{is\_overdue} = (\text{status} \neq \text{'Resolved'}) \land (\text{Remaining Seconds} < 0)$$
+is_overdue = (status != "Resolved") AND (Remaining Seconds < 0)
+```
 
 - **SLA Status Badges:**
-  - `normal`: $\text{Remaining Seconds} > 86,400\text{s}$ (Cyan/Emerald badge)
-  - `approaching`: $0 \le \text{Remaining Seconds} \le 86,400\text{s}$ (Amber badge)
-  - `overdue`: $\text{Remaining Seconds} < 0$ (Rose/Flame badge)
+  - `normal`: `Remaining Seconds > 86,400s` (Cyan/Emerald badge)
+  - `approaching`: `0 <= Remaining Seconds <= 86,400s` (Amber badge)
+  - `overdue`: `Remaining Seconds < 0` (Rose/Flame badge)
   - `resolved`: Complaint is resolved (Emerald badge)
 
 ---
