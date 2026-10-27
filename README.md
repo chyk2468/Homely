@@ -2,6 +2,8 @@
 
 > A modern, full-stack apartment society maintenance and complaint management platform designed for residents, maintenance staff technicians, and society administrators.
 
+![Homely complaint lifecycle](docs/readme-architecture.svg)
+
 [![Live Demo](https://img.shields.io/badge/Live_Deployment-frontend--tau--eight--14.vercel.app-2ea44f?style=for-the-badge&logo=vercel)](https://frontend-tau-eight-14.vercel.app/login)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React_19_+_Vite-61DAFB?logo=react&logoColor=black)](https://vitejs.dev/)
